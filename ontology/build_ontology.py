@@ -2,6 +2,7 @@
 
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, OWL
+from owlready2 import get_ontology, sync_reasoner
 
 def load_ontology(path: str) -> Graph:
     """
@@ -31,3 +32,31 @@ def load_ontology(path: str) -> Graph:
             raise ValueError(f"Classe {name} não encontrada como owl:Class")
 
     return g
+
+
+def build_ontology_graph(ontology_path: str) -> Graph:
+    """Carrega uma ontologia OWL/XML, roda o raciocinador e retorna um grafo RDFlib.
+
+    Parameters
+    ----------
+    ontology_path : str
+        Caminho para o arquivo ``.owl`` contendo a ontologia.
+
+    Returns
+    -------
+    Graph
+        Grafo ``rdflib`` com axiomas explícitos e inferidos.
+    """
+
+    # 1. Carrega a ontologia com Owlready2
+    onto = get_ontology(ontology_path).load()
+
+    # 2. Executa o reasoner dentro do contexto da ontologia
+    with onto:
+        sync_reasoner()
+
+    # 3. Exporta para um RDFLib Graph
+    rdf_graph = onto.world.as_rdflib_graph()
+
+    # 4. Retorna o grafo resultante
+    return rdf_graph
