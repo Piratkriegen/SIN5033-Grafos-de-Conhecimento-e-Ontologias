@@ -1,0 +1,77 @@
+# pipeline/generate_recommendations.py
+# Python 3
+
+"""Pipeline para gerar recomendações serendipiosas."""
+
+from typing import Any, Dict, List, Tuple
+
+from rdflib import URIRef, Graph
+
+from ontology.build_ontology import build_ontology_graph
+from content_recommender.query_by_preference import query_by_preference
+from collaborative_recommender.surprise_rs import SurpriseRS
+from serendipity.distance import compute_avg_shortest_path_length
+from engine import rerank
+
+import networkx as nx
+
+BASE = "http://ex.org/stream#"
+
+
+def _build_graph(rdf_graph: Graph) -> nx.Graph:
+    """Converte um rdflib.Graph em um grafo networkx simples."""
+
+    graph = nx.Graph()
+    predicates = [
+        URIRef(BASE + "assiste"),
+        URIRef(BASE + "pertenceAGenero"),
+    ]
+
+    for pred in predicates:
+        for s, p, o in rdf_graph.triples((None, pred, None)):
+            graph.add_node(s)
+            graph.add_node(o)
+            graph.add_edge(s, o)
+
+    return graph
+
+
+def generate_recommendations(
+    user_id: Any,
+    ratings: Dict[Tuple[Any, Any], float],
+    ontology_path: str,
+    top_n: int = 10,
+    alpha: float = 0.5,
+    beta: float = 0.5,
+) -> List[str]:
+    """Gera recomendações hibridas baseadas em conteúdo e colaboração."""
+
+    # 1. Carrega o grafo com inferência
+    rdf_graph = build_ontology_graph(ontology_path)
+
+    # 2. Seleciona candidatos baseados no conteúdo
+    user_uri = BASE + str(user_id)
+    candidate_names = query_by_preference(rdf_graph, user_uri)
+    candidates = [URIRef(BASE + name) for name in candidate_names]
+
+    # 3. Treina e prediz relevância colaborativa
+    rs = SurpriseRS()
+    # converte itens de ratings para URIRefs para compatibilidade
+    ratings_uri = {
+        (u, URIRef(BASE + i) if not isinstance(i, URIRef) else i): r
+        for (u, i), r in ratings.items()
+    }
+    rs.fit(ratings_uri)
+    relevance = rs.predict(user_id, candidates)
+
+    # 4. Calcula novelty a partir do grafo
+    graph_nx = _build_graph(rdf_graph)
+    novelty_full = compute_avg_shortest_path_length(graph_nx)
+    novelty = {c: novelty_full.get(c, 0.0) for c in candidates}
+
+    # 5. Reordena
+    ordered = rerank(candidates, relevance, novelty, alpha, beta)
+
+    # 6. Extrai local-names e limita ao top_n
+    return [str(uri).split("#")[-1] for uri in ordered[:top_n]]
+
