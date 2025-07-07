@@ -2,7 +2,7 @@ import pytest
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, OWL
 
-from ontology.ontology_loader import load_ontology
+from ontology.build_ontology import load_ontology
 
 def test_load_valid_ontology(tmp_path):
     # 1. Cria um arquivo TTL mínimo
