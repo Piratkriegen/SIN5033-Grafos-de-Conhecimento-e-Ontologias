@@ -1,0 +1,6 @@
+@prefix : <http://ex.org/stream#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+:Video     rdf:type owl:Class .
+:Usuario   rdf:type owl:Class .
+:Genero    rdf:type owl:Class .

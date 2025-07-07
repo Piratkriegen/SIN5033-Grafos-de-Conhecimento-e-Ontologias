@@ -1,28 +1,19 @@
-# Python 3
-from rdflib import Graph, URIRef
-from rdflib.namespace import RDF
+# src/recommender/ontology_loader.py
 
+from rdflib import Graph, URIRef
+from rdflib.namespace import RDF, OWL
 
 def load_ontology(path: str) -> Graph:
-    """Load ontology file and validate required classes exist.
-
-    Parameters
-    ----------
-    path : str
-        Path to a .ttl or .owl file.
-
-    Returns
-    -------
-    Graph
-        RDFLib Graph with all triples loaded.
+    """
+    path: caminho para arquivo .ttl ou .owl
+    retorna: um RDFLib Graph com todos os axiomas carregados
 
     Raises
     ------
     ValueError
-        If :Video, :Usuario or :Genero classes are not defined.
+        Se :Video, :Usuario ou :Genero não estiverem definidos como classes.
     """
     g = Graph()
-    # Determine format by extension (defaults to turtle)
     fmt = "xml" if path.endswith(('.owl', '.rdf', '.xml')) else "turtle"
     g.parse(path, format=fmt)
 
@@ -32,8 +23,11 @@ def load_ontology(path: str) -> Graph:
         "Usuario": URIRef(base + "Usuario"),
         "Genero": URIRef(base + "Genero"),
     }
+
+    # Aqui mudamos a verificação:
+    # procuramos (uri, rdf:type, owl:Class)
     for name, uri in required.items():
-        if not any(g.triples((None, RDF.type, uri))):
-            raise ValueError(f"Classe {name} n\u00e3o encontrada")
+        if not any(g.triples((uri, RDF.type, OWL.Class))):
+            raise ValueError(f"Classe {name} não encontrada como owl:Class")
 
     return g
