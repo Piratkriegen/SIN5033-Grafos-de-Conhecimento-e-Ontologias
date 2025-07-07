@@ -1,5 +1,6 @@
 # manipulação de RDF/OWL
 rdflib>=6.0.0
+owlrl>=6.0
 
 # grafo e métricas de rede complexa
 networkx>=2.8
