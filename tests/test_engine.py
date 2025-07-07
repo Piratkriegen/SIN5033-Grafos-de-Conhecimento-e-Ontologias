@@ -1,5 +1,5 @@
 import pytest
-from src.recommender.engine import rerank
+from pipeline.engine import rerank
 
 def test_rerank_basic():
     candidates = [1, 2]

@@ -1,52 +1,37 @@
-# arquivo: collaborative_recommender/surprise_rs.py
-# Python 3
-
+# collaborative_recommender/surprise_rs.py
 from typing import Any, Dict, List, Tuple
-
-import pandas as pd
-from surprise import Dataset, Reader, SVD
-from surprise.model_selection import train_test_split
-
 
 class SurpriseRS:
     """
-    Wrapper de um algoritmo do Surprise para gerar relevância.
-
-    Exemplo de uso:
-      rs = SurpriseRS(algo=SVD())
-      rs.fit(ratings_dict)
-      relevance = rs.predict(user_id, item_list)
-
-    ratings_dict: {(user_id, item_id): rating}
+    Wrapper simplificado que não depende de scikit-surprise.
+    No fit, só armazena o dicionário de ratings e computa média global.
+    No predict, para cada item:
+      - se houver ratings, retorna média dos ratings daquele item;
+      - senão, retorna a média global.
     """
 
-    def __init__(self, algo=None):
-        self.algo = algo or SVD()
-        self._trainset = None
+    def __init__(self) -> None:
+        self.ratings: Dict[Tuple[Any, Any], float] = {}
+        self.global_mean: float = 0.0
 
     def fit(self, ratings: Dict[Tuple[Any, Any], float]) -> None:
-        """Constrói o Dataset Surprise e treina o modelo."""
-        # converte para DataFrame
-        df = pd.DataFrame(
-            [(u, i, r) for (u, i), r in ratings.items()],
-            columns=["user", "item", "rating"],
-        )
-        if df.empty:
-            self._trainset = None
-            return
-
-        rating_min = df["rating"].min()
-        rating_max = df["rating"].max()
-        reader = Reader(rating_scale=(rating_min, rating_max))
-        dataset = Dataset.load_from_df(df[["user", "item", "rating"]], reader)
-        trainset, _ = train_test_split(dataset)
-        self.algo.fit(trainset)
-        self._trainset = trainset
+        self.ratings = ratings
+        if ratings:
+            self.global_mean = sum(ratings.values()) / len(ratings)
 
     def predict(self, user_id: Any, items: List[Any]) -> Dict[Any, float]:
-        """Para cada item em `items`, retorna a predição de rating."""
-        predictions: Dict[Any, float] = {}
+        # calcula soma e contagem por item
+        item_sum: Dict[Any, float] = {}
+        item_count: Dict[Any, int] = {}
+        for (_u, i), r in self.ratings.items():
+            item_sum[i] = item_sum.get(i, 0.0) + r
+            item_count[i] = item_count.get(i, 0) + 1
+
+        # gera predições
+        preds: Dict[Any, float] = {}
         for item in items:
-            pred = self.algo.predict(user_id, item).est
-            predictions[item] = pred
-        return predictions
+            if item_count.get(item, 0):
+                preds[item] = item_sum[item] / item_count[item]
+            else:
+                preds[item] = self.global_mean
+        return preds

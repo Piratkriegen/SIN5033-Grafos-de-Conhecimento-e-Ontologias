@@ -11,7 +11,7 @@ from ontology.build_ontology import build_ontology_graph
 from content_recommender.query_by_preference import query_by_preference
 from collaborative_recommender.surprise_rs import SurpriseRS
 from serendipity.distance import compute_avg_shortest_path_length
-from engine import rerank
+from .engine import rerank
 
 import networkx as nx
 
@@ -74,4 +74,3 @@ def generate_recommendations(
 
     # 6. Extrai local-names e limita ao top_n
     return [str(uri).split("#")[-1] for uri in ordered[:top_n]]
-
