@@ -3,9 +3,9 @@ from typing import Any, Dict, List, Tuple
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF
 
-from ...ontology.ontology_loader import load_ontology
-from .graph_builder    import build_graph
-from .features.distance   import compute_avg_shortest_path_length
+from ontology.build_ontology import load_ontology
+from .graph_builder import build_graph
+from serendipity.distance import compute_avg_shortest_path_length
 from .recommenders.surprise_rs import SurpriseRS
 from .engine import rerank
 

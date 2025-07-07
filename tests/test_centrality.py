@@ -1,6 +1,6 @@
 import networkx as nx
 import pytest
-from src.recommender.features.centrality import compute_betweenness
+from serendipity.centrality import compute_betweenness
 
 
 def test_compute_betweenness_path():

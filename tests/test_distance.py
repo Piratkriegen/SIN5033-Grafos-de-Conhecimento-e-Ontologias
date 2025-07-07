@@ -1,7 +1,7 @@
 import pytest
 import networkx as nx
 
-from src.recommender.features.distance import compute_avg_shortest_path_length
+from serendipity.distance import compute_avg_shortest_path_length
 
 def test_compute_avg_shortest_path_length_path():
     # Grafo linha: 1–2–3
