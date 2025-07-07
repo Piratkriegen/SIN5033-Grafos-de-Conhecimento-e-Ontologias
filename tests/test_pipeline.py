@@ -10,7 +10,32 @@ from serendipity.distance import compute_avg_shortest_path_length
 from pipeline.generate_recommendations import generate_recommendations
 
 BASE = "http://ex.org/stream#"
-TTL = """…"""  # seu TTL de teste
+TTL = """\
+@prefix : <http://ex.org/stream#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Ontologia mínima+dados
+:Usuario   a rdf:Class .
+:Filme     a rdf:Class .
+:Tematica  a rdf:Class .
+:acao      a :Tematica .
+:Drama     a :Tematica .
+:Spielberg a rdf:Resource .
+
+# preferências do usuário
+:user1 a :Usuario ;
+       :prefereTematica :acao ;
+       :prefereDiretor  :Spielberg .
+
+# filmes candidatos
+:videoA a :Filme ;
+        :tematica    :acao ;
+        :dirigidoPor :Spielberg .
+:videoB a :Filme ;
+        :tematica    :Drama ;
+        :dirigidoPor :Spielberg .
+"""
 
 def test_generate_recommendations_basic(tmp_path, monkeypatch):
     path = tmp_path / "ont.ttl"
