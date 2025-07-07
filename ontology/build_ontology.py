@@ -36,24 +36,19 @@ def load_ontology(path: str) -> Graph:
 
 
 def build_ontology_graph(ontology_path: str) -> Graph:
-    """Carrega uma ontologia OWL/XML ou TTL, executa inferências OWL RL e retorna um grafo ``rdflib``.
-
-    Parameters
-    ----------
-    ontology_path : str
-        Caminho para o arquivo ``.owl`` contendo a ontologia.
-
-    Returns
-    -------
-    Graph
-        Grafo ``rdflib`` com axiomas explícitos e inferidos.
     """
+    Carrega uma ontologia (OWL/XML ou TTL), aplica inferência OWL-RL
+    e retorna um rdflib.Graph com axiomas explícitos e inferidos.
+    """
+    g = Graph()
+    # 1) Primeiro tente carregar como Turtle (mesmo que a extensão seja .owl)
+    try:
+        g.parse(ontology_path, format="turtle")
+    except Exception:
+        # 2) Se falhar (não for TTL), tente como XML/RDF
+        g.parse(ontology_path, format="xml")
 
-    # 1. Carrega a ontologia usando RDFLib
-    g = load_ontology(ontology_path)
-
-    # 2. Executa o reasoner OWL RL diretamente no grafo
+    # 3) Roda o motor OWL-RL para materializar as inferências
     DeductiveClosure(OWLRL_Semantics).expand(g)
 
-    # 3. Retorna o grafo resultante com axiomas inferidos
     return g
