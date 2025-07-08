@@ -2,6 +2,7 @@
 import pytest
 from collaborative_recommender.surprise_rs import SurpriseRS
 
+
 def test_surprise_rs_basic():
     ratings = {
         ("u1", "i1"): 4.0,

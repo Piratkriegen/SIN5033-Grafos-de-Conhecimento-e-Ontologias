@@ -4,6 +4,7 @@
 from rdflib import Graph, URIRef
 import networkx as nx
 
+
 def build_graph(rdf_graph: Graph) -> nx.Graph:
     """
     Converte um ``rdflib.Graph`` em um grafo ``networkx`` não-direcionado.

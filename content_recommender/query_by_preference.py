@@ -2,6 +2,7 @@
 from rdflib import Graph
 from typing import List
 
+
 def query_by_preference(rdf_graph: Graph, user_uri: str) -> List[str]:
     """
     Retorna a lista de filmes que casam com as preferências do usuário,

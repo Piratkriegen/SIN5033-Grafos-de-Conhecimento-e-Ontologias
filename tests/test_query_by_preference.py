@@ -1,4 +1,3 @@
-import pytest
 from rdflib import Graph
 from content_recommender.query_by_preference import query_by_preference
 
@@ -15,12 +14,25 @@ TTL = """\
        :prefereDiretor :Nolan .
 
 # Filmes
-:filmeA a :Filme ; :tematica :Acao     ; :temAtor    :DiCaprio ; :temDiretor :Spielberg .
-:filmeB a :Filme ; :tematica :Drama    ; :temAtor    :DiCaprio ; :temDiretor :Nolan      .
-:filmeC a :Filme ; :tematica :Terror   ; :temAtor    :Someone   ; :temDiretor :Nolan      .
-:filmeD a :Filme ; :tematica :Comedia  ; :temAtor    :Someone   ; :temDiretor :Spielberg .
+:filmeA a :Filme ;
+        :tematica :Acao     ;
+        :temAtor    :DiCaprio ;
+        :temDiretor :Spielberg .
+:filmeB a :Filme ;
+        :tematica :Drama    ;
+        :temAtor    :DiCaprio ;
+        :temDiretor :Nolan      .
+:filmeC a :Filme ;
+        :tematica :Terror   ;
+        :temAtor    :Someone   ;
+        :temDiretor :Nolan      .
+:filmeD a :Filme ;
+        :tematica :Comedia  ;
+        :temAtor    :Someone   ;
+        :temDiretor :Spielberg .
 
 """
+
 
 def test_query_by_preference_extended(tmp_path):
     f = tmp_path / "g.ttl"

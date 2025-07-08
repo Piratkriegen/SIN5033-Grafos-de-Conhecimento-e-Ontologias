@@ -3,6 +3,7 @@ import networkx as nx
 
 from serendipity.distance import compute_avg_shortest_path_length
 
+
 def test_compute_avg_shortest_path_length_path():
     # Grafo linha: 1–2–3
     G = nx.path_graph([1, 2, 3])

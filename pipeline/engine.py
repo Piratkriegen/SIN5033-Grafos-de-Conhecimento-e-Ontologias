@@ -3,12 +3,13 @@
 
 from typing import List, Dict, Any
 
+
 def rerank(
     candidates: List[Any],
     relevance: Dict[Any, float],
     novelty: Dict[Any, float],
     alpha: float = 0.5,
-    beta:  float = 0.5
+    beta: float = 0.5,
 ) -> List[Any]:
     """
     Reordena uma lista de candidatos por serendipidade:
@@ -34,5 +35,7 @@ def rerank(
     """
     scores = {}
     for item in candidates:
-        scores[item] = alpha * novelty.get(item, 0.0) + beta * relevance.get(item, 0.0)
+        score = alpha * novelty.get(item, 0.0)
+        score += beta * relevance.get(item, 0.0)
+        scores[item] = score
     return sorted(candidates, key=lambda x: scores[x], reverse=True)

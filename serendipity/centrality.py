@@ -4,6 +4,7 @@
 import networkx as nx
 from typing import Dict, Any
 
+
 def compute_betweenness(graph: nx.Graph) -> Dict[Any, float]:
     """Calcula a centralidade de betweenness para todos os nós do grafo.
 

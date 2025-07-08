@@ -5,10 +5,13 @@ import networkx as nx
 from typing import Dict, Any
 
 
-def compute_avg_shortest_path_length(graph: nx.Graph) -> Dict[Any, float]:
-    """
-    Para cada nó em `graph`, calcula a média das distâncias (caminhos mais curtos)
-    até todos os outros nós alcançáveis.
+def compute_avg_shortest_path_length(
+    graph: nx.Graph,
+) -> Dict[Any, float]:
+    """Calcula a média das distâncias (caminhos mais curtos).
+
+    Para cada nó em ``graph`` são consideradas todas as distâncias
+    até os demais nós alcançáveis.
 
     Parâmetros
     ----------
