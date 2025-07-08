@@ -1,35 +1,33 @@
 import pytest
-from rdflib import Graph, URIRef
-from rdflib.namespace import RDF
+from rdflib import Graph
 from content_recommender.query_by_preference import query_by_preference
 
-BASE = "http://ex.org/stream#"
+BASE = "http://amazingvideo.org#"
 
 TTL = """\
-@prefix : <http://ex.org/stream#> .
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://amazingvideo.org#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
+# Usuário com 3 tipos de preferência
 :user1 a :Usuario ;
-       :prefereTematica :acao ;
-       :prefereDiretor  :Spielberg .
+       :prefereTematica :Acao ;
+       :prefereAtor    :DiCaprio ;
+       :prefereDiretor :Nolan .
 
-:video1 a :Video ;
-        :tematica       :acao ;
-        :dirigidoPor    :Spielberg .
+# Filmes
+:filmeA a :Filme ; :tematica :Acao     ; :temAtor    :DiCaprio ; :temDiretor :Spielberg .
+:filmeB a :Filme ; :tematica :Drama    ; :temAtor    :DiCaprio ; :temDiretor :Nolan      .
+:filmeC a :Filme ; :tematica :Terror   ; :temAtor    :Someone   ; :temDiretor :Nolan      .
+:filmeD a :Filme ; :tematica :Comedia  ; :temAtor    :Someone   ; :temDiretor :Spielberg .
 
-:video2 a :Video ;
-        :tematica       :drama ;
-        :dirigidoPor    :Spielberg .
-
-:video3 a :Video ;
-        :tematica       :drama ;
-        :dirigidoPor    :Nolan .
 """
 
-def test_query_by_preference(tmp_path):
+def test_query_by_preference_extended(tmp_path):
     f = tmp_path / "g.ttl"
     f.write_text(TTL)
     g = Graph().parse(str(f), format="turtle")
-    # chamamos diretamente: ele deve devolver video1 e video2
+
+    # filtra por temática OR ator OR diretor
     results = query_by_preference(g, BASE + "user1")
-    assert set(results) == {"video1", "video2"}
+    assert set(results) == {"filmeA", "filmeB", "filmeC"}
+    # (filmeA: tema+ator, filmeB: ator+diretor, filmeC: diretor)
