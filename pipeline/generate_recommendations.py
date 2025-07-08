@@ -9,9 +9,10 @@ from rdflib import URIRef, Graph
 from rdflib.namespace import RDF
 
 from ontology.build_ontology import build_ontology_graph
-from content_recommender.query_by_preference import query_by_preference
+# from content_recommender.query_by_preference import query_by_preference
 from collaborative_recommender.surprise_rs import SurpriseRS
-from serendipity.distance import compute_avg_shortest_path_length
+# from serendipity.distance import compute_avg_shortest_path_length
+from serendipity.centrality import compute_betweenness
 from .engine import rerank
 
 import networkx as nx
@@ -59,10 +60,12 @@ def generate_recommendations(
     # 1. Carrega o grafo com inferência
     rdf_graph = build_ontology_graph(ontology_path)
 
-    # 2. Seleciona candidatos baseados no conteúdo
-    user_uri = BASE + str(user_id)
-    candidate_names = query_by_preference(rdf_graph, user_uri)
-    candidates = [URIRef(BASE + name) for name in candidate_names]
+    # 2. Seleciona TODOS os vídeos (instâncias de :Filme)
+    video_class = URIRef(BASE + "Filme")
+    candidates = [
+        subj
+        for subj, _, _ in rdf_graph.triples((None, RDF.type, video_class))
+    ]
 
     # 3. Treina e prediz relevância colaborativa
     rs = SurpriseRS()
@@ -76,7 +79,7 @@ def generate_recommendations(
 
     # 4. Calcula novelty a partir do grafo
     graph_nx = _build_graph(rdf_graph)
-    novelty_full = compute_avg_shortest_path_length(graph_nx)
+    novelty_full = compute_betweenness(graph_nx)
     novelty = {c: novelty_full.get(c, 0.0) for c in candidates}
 
     # 5. Reordena
