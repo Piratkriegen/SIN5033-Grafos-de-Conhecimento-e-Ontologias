@@ -56,8 +56,32 @@ def generate_recommendations(
     top_n: int = 10,
     alpha: float = 0.5,
     beta: float = 0.5,
+    novelty_metric: str = "betweenness",
 ) -> List[str]:
-    """Gera recomendações hibridas baseadas em conteúdo e colaboração."""
+    """Gera recomendações híbridas baseadas em conteúdo e colaboração.
+
+    Parameters
+    ----------
+    user_id : Any
+        Identificador do usuário.
+    ratings : Dict[Tuple[Any, Any], float]
+        Avaliações conhecidas.
+    ontology_path : str
+        Caminho para o arquivo de ontologia.
+    top_n : int
+        Número máximo de itens retornados.
+    alpha : float
+        Peso de novidade.
+    beta : float
+        Peso de relevância.
+    novelty_metric : str
+        Métrica de novidade a ser utilizada.
+
+    Returns
+    -------
+    List[str]
+        Lista de identificadores de vídeo.
+    """
 
     # 1. Carrega o grafo com inferência
     rdf_graph = build_ontology_graph(ontology_path)
@@ -91,7 +115,33 @@ def generate_recommendations(
 
     # 4. Calcula novelty a partir do grafo
     graph_nx = _build_graph(rdf_graph)
-    novelty_full = compute_betweenness(graph_nx)
+
+    from serendipity.metrics import (
+        compute_clustering_coefficient,
+        compute_pagerank,
+        compute_hhi,
+    )
+
+    if novelty_metric == "betweenness":
+        novelty_full = compute_betweenness(graph_nx)
+    elif novelty_metric == "avg_shortest_path":
+        from serendipity.distance import compute_avg_shortest_path_length
+
+        novelty_full = compute_avg_shortest_path_length(graph_nx)
+    elif novelty_metric == "clustering":
+        novelty_full = compute_clustering_coefficient(graph_nx)
+    elif novelty_metric == "pagerank":
+        novelty_full = compute_pagerank(graph_nx)
+    elif novelty_metric == "hhi":
+        from networkx.algorithms import community
+
+        communities = {}
+        for cid, comm in enumerate(community.louvain_communities(graph_nx, seed=42)):
+            for node in comm:
+                communities[node] = cid
+        novelty_full = compute_hhi(graph_nx, communities)
+    else:
+        raise ValueError(f"Unknown novelty_metric: {novelty_metric}")
     novelty = {c: novelty_full.get(c, 0.0) for c in candidates}
 
     # 5. Reordena
