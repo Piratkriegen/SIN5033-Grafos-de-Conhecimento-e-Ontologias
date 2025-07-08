@@ -6,6 +6,7 @@
 from typing import Any, Dict, List, Tuple
 
 from rdflib import URIRef, Graph
+from rdflib.namespace import RDF
 
 from ontology.build_ontology import build_ontology_graph
 from content_recommender.query_by_preference import query_by_preference
@@ -19,19 +20,28 @@ BASE = "http://ex.org/stream#"
 
 
 def _build_graph(rdf_graph: Graph) -> nx.Graph:
-    """Converte um rdflib.Graph em um grafo networkx simples."""
+    """Converte um ``rdflib.Graph`` em um grafo ``networkx`` simples.
+
+    A implementação anterior considerava apenas as relações ``:assiste`` e
+    ``:pertenceAGenero``.  Nos testes fornecidos, entretanto, os grafos usam
+    outras propriedades como ``:tematica`` e ``:dirigidoPor``.  Para que a
+    métrica de novidade funcione corretamente em todos os cenários de teste,
+    passamos a considerar **todas** as triplas (exceto ``rdf:type``) ao montar o
+    grafo.
+    """
 
     graph = nx.Graph()
-    predicates = [
-        URIRef(BASE + "assiste"),
-        URIRef(BASE + "pertenceAGenero"),
-    ]
 
-    for pred in predicates:
-        for s, p, o in rdf_graph.triples((None, pred, None)):
-            graph.add_node(s)
-            graph.add_node(o)
-            graph.add_edge(s, o)
+    for s, p, o in rdf_graph.triples((None, None, None)):
+        if p == RDF.type:
+            # "rdf:type" apenas declara classes; não contribui para conectividade
+            continue
+        if not isinstance(o, URIRef):
+            # ignoramos valores literais para manter apenas ligações entre nós
+            continue
+        graph.add_node(s)
+        graph.add_node(o)
+        graph.add_edge(s, o)
 
     return graph
 
