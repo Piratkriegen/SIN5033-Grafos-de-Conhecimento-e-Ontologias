@@ -40,6 +40,13 @@ def query_by_preference(rdf_graph: Graph, user_uri: str) -> List[str]:
     """
     # …aqui o Codex deve:
     #   1. executar `rdf_graph.query(sparql)`
-    #   2. iterar sobre os resultados, extrair `str(f)["#"][-1]`
+    #   2. iterar sobre os resultados, extrair `str(f).split("#")[-1]`
     #   3. devolver lista de strings
-    pass
+
+    results = rdf_graph.query(sparql)
+    filmes: List[str] = []
+    for row in results:
+        filme_uri = row[0]
+        filmes.append(str(filme_uri).split("#")[-1])
+
+    return filmes
