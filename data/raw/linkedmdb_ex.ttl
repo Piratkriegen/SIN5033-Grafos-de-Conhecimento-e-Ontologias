@@ -1,0 +1,7 @@
+@prefix ex: <http://ex.org/stream#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+ex:movie1 a ex:Filme ;
+    ex:temAtor ex:actor1 ;
+    ex:temDiretor ex:director1 ;
+    ex:tematica ex:genre1 .
