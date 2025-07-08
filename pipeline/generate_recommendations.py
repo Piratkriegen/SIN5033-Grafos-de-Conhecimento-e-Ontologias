@@ -10,7 +10,7 @@ from rdflib.namespace import RDF
 
 from ontology.build_ontology import build_ontology_graph
 
-# from content_recommender.query_by_preference import query_by_preference
+from content_recommender.query_by_preference import query_by_preference
 from collaborative_recommender.surprise_rs import SurpriseRS
 
 # from serendipity.distance import compute_avg_shortest_path_length
@@ -62,11 +62,22 @@ def generate_recommendations(
     # 1. Carrega o grafo com inferência
     rdf_graph = build_ontology_graph(ontology_path)
 
-    # 2. Seleciona TODOS os vídeos (instâncias de :Filme)
-    video_class = URIRef(BASE + "Filme")
-    candidates = [
-        subj for subj, _, _ in rdf_graph.triples((None, RDF.type, video_class))
-    ]
+    # 2. Seleciona candidatos via content-based (SPARQL)
+    #    usando as preferências do usuário na ontologia inferida
+
+    user_uri = BASE + str(user_id)
+    # retorna lista de local-names, ex: ["videoA","videoB"]
+    candidate_names = query_by_preference(rdf_graph, user_uri)
+    # converte de volta para URIRefs
+    candidates = [URIRef(BASE + name) for name in candidate_names]
+
+    # (Opcional) Se não houver candidato por filtro de conteúdo,
+    # pode-se cair em todos os filmes:
+    if not candidates:
+        video_class = URIRef(BASE + "Filme")
+        candidates = [
+            subj for subj, _, _ in rdf_graph.triples((None, RDF.type, video_class))
+        ]
 
     # 3. Treina e prediz relevância colaborativa
     rs = SurpriseRS()
