@@ -9,8 +9,10 @@ from rdflib import URIRef, Graph
 from rdflib.namespace import RDF
 
 from ontology.build_ontology import build_ontology_graph
+
 # from content_recommender.query_by_preference import query_by_preference
 from collaborative_recommender.surprise_rs import SurpriseRS
+
 # from serendipity.distance import compute_avg_shortest_path_length
 from serendipity.centrality import compute_betweenness
 from .engine import rerank
@@ -24,18 +26,18 @@ def _build_graph(rdf_graph: Graph) -> nx.Graph:
     """Converte um ``rdflib.Graph`` em um grafo ``networkx`` simples.
 
     A implementação anterior considerava apenas as relações ``:assiste`` e
-    ``:pertenceAGenero``.  Nos testes fornecidos, entretanto, os grafos usam
-    outras propriedades como ``:tematica`` e ``:dirigidoPor``.  Para que a
+    ``:pertenceAGenero``. Nos testes fornecidos, entretanto, os grafos usam
+    outras propriedades como ``:tematica`` e ``:dirigidoPor``. Para que a
     métrica de novidade funcione corretamente em todos os cenários de teste,
-    passamos a considerar **todas** as triplas (exceto ``rdf:type``) ao montar o
-    grafo.
+    passamos a considerar **todas** as triplas (exceto ``rdf:type``) ao
+    montar o grafo.
     """
 
     graph = nx.Graph()
 
     for s, p, o in rdf_graph.triples((None, None, None)):
         if p == RDF.type:
-            # "rdf:type" apenas declara classes; não contribui para conectividade
+            # 'rdf:type' apenas declara classes; não contribui para conectividade
             continue
         if not isinstance(o, URIRef):
             # ignoramos valores literais para manter apenas ligações entre nós
@@ -63,8 +65,7 @@ def generate_recommendations(
     # 2. Seleciona TODOS os vídeos (instâncias de :Filme)
     video_class = URIRef(BASE + "Filme")
     candidates = [
-        subj
-        for subj, _, _ in rdf_graph.triples((None, RDF.type, video_class))
+        subj for subj, _, _ in rdf_graph.triples((None, RDF.type, video_class))
     ]
 
     # 3. Treina e prediz relevância colaborativa

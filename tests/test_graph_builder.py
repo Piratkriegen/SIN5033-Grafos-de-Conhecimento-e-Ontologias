@@ -1,6 +1,4 @@
-import pytest
 from rdflib import Graph
-from rdflib.namespace import RDF
 from rdflib import URIRef
 import networkx as nx
 
@@ -27,6 +25,7 @@ TEST_TTL = """\
 :user1   :assiste           :video1 .
 :video1  :pertenceAGenero   :genre1 .
 """
+
 
 def test_build_graph(tmp_path):
     # 1. Cria e carrega o TTL

@@ -1,6 +1,7 @@
 # collaborative_recommender/surprise_rs.py
 from typing import Any, Dict, List, Tuple
 
+
 class SurpriseRS:
     """
     Wrapper simplificado que não depende de scikit-surprise.
