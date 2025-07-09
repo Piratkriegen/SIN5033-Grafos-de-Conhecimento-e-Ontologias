@@ -43,10 +43,7 @@ def generate_recommendations(
     rs = SurpriseRS()
     rs.fit(ratings)
 
-    # 6. Converte os itens já avaliados para URIRefs (não usado por ora)
-    _rated_videos = {URIRef(BASE + item) for (user, item) in ratings if user == user_id}
-
-    # 7. Define candidatos como vídeos não avaliados
+    # 6. Define candidatos como vídeos não avaliados
     candidates = video_nodes
 
     # 8. Obtém relevância prevista (fake_predict será aplicado aqui no teste)

@@ -42,7 +42,10 @@ def compute_pagerank(graph: nx.Graph, **kwargs: Any) -> Dict[Any, float]:
     return nx.pagerank(graph, **kwargs)
 
 
-def compute_hhi(graph: nx.Graph, communities: Dict[Any, int]) -> Dict[Any, float]:
+def compute_hhi(
+    graph: nx.Graph,
+    communities: Dict[Any, int],
+) -> Dict[Any, float]:
     """Calcula o índice de Herfindahl-Hirschman (HHI) de cada nó.
 
     Para cada nó, considera a distribuição dos vizinhos entre as

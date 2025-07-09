@@ -37,7 +37,8 @@ def _build_graph(rdf_graph: Graph) -> nx.Graph:
 
     for s, p, o in rdf_graph.triples((None, None, None)):
         if p == RDF.type:
-            # 'rdf:type' apenas declara classes; não contribui para conectividade
+            # 'rdf:type' apenas declara classes; não contribui para
+            # conectividade
             continue
         if not isinstance(o, URIRef):
             # ignoramos valores literais para manter apenas ligações entre nós
@@ -99,9 +100,8 @@ def generate_recommendations(
     # pode-se cair em todos os filmes:
     if not candidates:
         video_class = URIRef(BASE + "Filme")
-        candidates = [
-            subj for subj, _, _ in rdf_graph.triples((None, RDF.type, video_class))
-        ]
+        triples = rdf_graph.triples((None, RDF.type, video_class))
+        candidates = [subj for subj, _, _ in triples]
 
     # 3. Treina e prediz relevância colaborativa
     rs = SurpriseRS()
@@ -136,7 +136,8 @@ def generate_recommendations(
         from networkx.algorithms import community
 
         communities = {}
-        for cid, comm in enumerate(community.louvain_communities(graph_nx, seed=42)):
+        louvain = community.louvain_communities(graph_nx, seed=42)
+        for cid, comm in enumerate(louvain):
             for node in comm:
                 communities[node] = cid
         novelty_full = compute_hhi(graph_nx, communities)
