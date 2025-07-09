@@ -5,6 +5,7 @@ from rdflib.namespace import RDF, OWL
 from owlrl import DeductiveClosure, OWLRL_Semantics
 import gzip
 
+
 def load_ontology(path: str) -> Graph:
     """
     path: caminho para arquivo .ttl ou .owl
@@ -50,9 +51,16 @@ def build_ontology_graph(ontology_path: str) -> Graph:
         g.parse(data=data, format="turtle")
 
     else:
-        # 2) Tenta carregar direto por extensão
-        fmt = "xml" if ontology_path.endswith((".owl", ".rdf", ".xml")) else "turtle"
-        g.parse(ontology_path, format=fmt)
+        # 2) Tenta carregar direto por extensão e faz fallback se precisar
+        ext_xml = (".owl", ".rdf", ".xml")
+        fmt = "xml" if ontology_path.endswith(ext_xml) else "turtle"
+        try:
+            g.parse(ontology_path, format=fmt)
+        except Exception:
+            if fmt == "xml":
+                g.parse(ontology_path, format="turtle")
+            else:
+                raise
 
     # 3) Roda o reasoner OWL RL
     DeductiveClosure(OWLRL_Semantics).expand(g)
