@@ -3,7 +3,7 @@
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, OWL
 from owlrl import DeductiveClosure, OWLRL_Semantics
-
+import gzip
 
 def load_ontology(path: str) -> Graph:
     """
@@ -37,18 +37,23 @@ def load_ontology(path: str) -> Graph:
 
 def build_ontology_graph(ontology_path: str) -> Graph:
     """
-    Carrega uma ontologia (OWL/XML ou TTL), aplica inferência OWL-RL
+    Carrega uma ontologia (TTL, OWL ou TTL.GZ), executa inferências OWL RL
     e retorna um rdflib.Graph com axiomas explícitos e inferidos.
     """
     g = Graph()
-    # 1) Primeiro tente carregar como Turtle (mesmo que a extensão seja .owl)
-    try:
-        g.parse(ontology_path, format="turtle")
-    except Exception:
-        # 2) Se falhar (não for TTL), tente como XML/RDF
-        g.parse(ontology_path, format="xml")
 
-    # 3) Roda o motor OWL-RL para materializar as inferências
+    # 1) Se for .ttl.gz ou .owl.gz, descompacta primeiro
+    if ontology_path.endswith((".ttl.gz", ".owl.gz", ".rdf.gz")):
+        with gzip.open(ontology_path, "rt", encoding="utf-8") as f:
+            data = f.read()
+        # sempre formato turtle no dump
+        g.parse(data=data, format="turtle")
+
+    else:
+        # 2) Tenta carregar direto por extensão
+        fmt = "xml" if ontology_path.endswith((".owl", ".rdf", ".xml")) else "turtle"
+        g.parse(ontology_path, format=fmt)
+
+    # 3) Roda o reasoner OWL RL
     DeductiveClosure(OWLRL_Semantics).expand(g)
-
     return g
