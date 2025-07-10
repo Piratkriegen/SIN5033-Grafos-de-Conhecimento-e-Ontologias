@@ -1,5 +1,7 @@
 from __future__ import annotations
-from typing import List, Tuple
+from typing import Dict, List, Tuple
+
+import json
 
 import pandas as pd
 import requests
@@ -11,6 +13,7 @@ from pipeline.generate_logical_recommendations import recommend_logical
 from pipeline.generate_recommendations import generate_recommendations
 
 DATA_PATH = "data/raw/serendipity_films_full.ttl.gz"
+USERS_PATH = "data/demo_users.json"
 WIKIDATA_URL = "https://query.wikidata.org/sparql"
 PLACEHOLDER_IMG = "https://placehold.co/200x300?text=Poster"
 
@@ -47,6 +50,25 @@ def load_catalog() -> pd.DataFrame:
     # usa o grafo global _graph
     uris = [str(r.f) for r in _graph.query(query)]
     return pd.DataFrame({"uri": uris})
+
+
+@st.cache_data
+def load_users(path: str = USERS_PATH) -> Dict[str, Dict[str, float]]:
+    """Carrega ratings de usuários de um arquivo JSON.
+
+    Parameters
+    ----------
+    path : str
+        Caminho para o JSON.
+
+    Returns
+    -------
+    Dict[str, Dict[str, float]]
+        Dicionário ``{usuario: {item: rating}}``.
+    """
+
+    with open(path, "r", encoding="utf-8") as fh:
+        return json.load(fh)
 
 
 @st.cache_data(show_spinner=False)
@@ -131,6 +153,15 @@ def get_details(graph: Graph, uri: str) -> dict[str, List[str]]:
 
 _graph = load_graph()
 catalog_df = load_catalog()
+users = load_users()
+
+user_id = st.selectbox("\U0001f464 Selecione um usuário", options=list(users))
+
+with st.sidebar.expander("Filmes assistidos"):
+    for vid, rating in users[user_id].items():
+        uri = vid if vid.startswith("http") else f"http://www.wikidata.org/entity/{vid}"
+        label = fetch_label_year(uri)[0]
+        st.write(f"{label}: {rating}/5")
 
 st.title("Amazing Video Recommender")
 
@@ -157,9 +188,10 @@ if selected:
         col.image(img, caption=fetch_label_year(uri)[0], use_column_width=True)
 
     st.subheader("Ou se surpreenda com…")
+    ratings = {(user_id, vid): float(r) for vid, r in users[user_id].items()}
     recs_ser = generate_recommendations(
-        "user",
-        {("user", URIRef(selected)): 5.0},
+        user_id,
+        ratings,
         DATA_PATH,
         top_n=5,
         alpha=1.0,
