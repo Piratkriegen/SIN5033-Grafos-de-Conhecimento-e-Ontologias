@@ -127,73 +127,46 @@ def get_details(graph: Graph, uri: str) -> dict[str, List[str]]:
     return {"genres": genres, "directors": directors, "cast": cast}
 
 
-def _show_row_of_posters(uri_list: List[str]) -> None:
-    """Exibe uma fileira de capas clicáveis."""
-
-    cols = st.columns(len(uri_list))
-    for col, uri in zip(cols, uri_list):
-        title, _ = fetch_label_year(uri)
-        img = fetch_image(uri)
-        col.image(img, use_column_width=True)
-        col.markdown(
-            f"<div style='text-align:center'>{title}</div>",
-            unsafe_allow_html=True,
-        )
-        if col.button("Ver detalhes", key=f"poster_{uri}"):
-            st.session_state.selected_uri = uri
-
-
 # --- Configuração inicial ---
 
 _graph = load_graph()
 catalog_df = load_catalog()
 
-if "selected_uri" not in st.session_state:
-    st.session_state.selected_uri = None
-
 st.title("Amazing Video Recommender")
 
-search = st.text_input("🔍 Buscar filme")
-filtered = (
-    catalog_df[catalog_df["uri"].str.contains(search, case=False)]
-    if search
-    else catalog_df
+selected = st.selectbox(
+    "\U0001f50d Selecione um filme",
+    options=catalog_df["uri"],
+    format_func=lambda u: fetch_label_year(u)[0],
 )
 
-uris = filtered["uri"].tolist()
-# fmt: off
-for i in range(0, len(uris), 5):
-    _show_row_of_posters(uris[i:i + 5])
-# fmt: on
+if selected:
+    with st.expander("Detalhes do filme"):
+        title, year = fetch_label_year(selected)
+        st.markdown(f"### {title} ({year or 'N/A'})")
+        details = get_details(_graph, selected)
+        st.write("**Gêneros:**", ", ".join(details["genres"]) or "N/A")
+        st.write("**Diretores:**", ", ".join(details["directors"]) or "N/A")
+        st.write("**Elenco:**", ", ".join(details["cast"]) or "N/A")
 
-selected_uri = st.session_state.get("selected_uri")
-if selected_uri:
-    title, year = fetch_label_year(selected_uri)
-    st.header(f"{title} ({year or 'N/A'})")
-    details = get_details(_graph, selected_uri)
-    if details["genres"]:
-        st.markdown("**Gêneros:** " + ", ".join(details["genres"]))
-    if details["directors"]:
-        st.markdown("**Diretores:** " + ", ".join(details["directors"]))
-    if details["cast"]:
-        st.markdown("**Elenco:** " + ", ".join(details["cast"]))
+    st.subheader("Você pode gostar também de…")
+    recs_log = recommend_logical(selected, DATA_PATH)
+    cols = st.columns(len(recs_log))
+    for col, uri in zip(cols, recs_log):
+        img = fetch_image(uri)
+        col.image(img, caption=fetch_label_year(uri)[0], use_column_width=True)
 
-    st.subheader("Você pode gostar também de...")
-    logical = recommend_logical(selected_uri, DATA_PATH)
-    _show_row_of_posters(logical)
-
-    st.subheader("Ou você pode se surpreender com...")
-    serendip = generate_recommendations(
+    st.subheader("Ou se surpreenda com…")
+    recs_ser = generate_recommendations(
         "user",
-        {("user", URIRef(selected_uri)): 5.0},
+        {("user", URIRef(selected)): 5.0},
         DATA_PATH,
         top_n=5,
         alpha=1.0,
         beta=0.0,
     )
-    # fmt: off
-    serendip_uris = [
-        f"http://www.wikidata.org/entity/{qid}" for qid in serendip
-    ]
-    # fmt: on
-    _show_row_of_posters(serendip_uris)
+    cols = st.columns(len(recs_ser))
+    for col, qid in zip(cols, recs_ser):
+        uri = f"http://www.wikidata.org/entity/{qid}"
+        img = fetch_image(uri)
+        col.image(img, caption=fetch_label_year(uri)[0], use_column_width=True)
