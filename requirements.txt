@@ -20,7 +20,7 @@ scikit-surprise>=1.1.1
 SPARQLWrapper>=2.0
 
 # front-end interativo
-streamlit>=1.12
+streamlit>=1.18
 
 # plotting de métricas e resultados
 matplotlib>=3.5
