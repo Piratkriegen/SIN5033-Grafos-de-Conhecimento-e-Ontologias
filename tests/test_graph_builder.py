@@ -3,11 +3,12 @@ from rdflib import URIRef
 import networkx as nx
 
 from src.recommender.graph_builder import build_graph
+from src.base_uri import EX_BASE
 
-BASE = "http://ex.org/stream#"
+BASE = EX_BASE
 
-TEST_TTL = """\
-@prefix : <http://ex.org/stream#> .
+TEST_TTL = f"""\
+@prefix : <{BASE}> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 

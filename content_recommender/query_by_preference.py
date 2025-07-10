@@ -2,6 +2,8 @@
 from rdflib import Graph
 from typing import List
 
+from src.base_uri import AMAZING_BASE
+
 
 def query_by_preference(rdf_graph: Graph, user_uri: str) -> List[str]:
     """
@@ -17,7 +19,7 @@ def query_by_preference(rdf_graph: Graph, user_uri: str) -> List[str]:
     rdf_graph : Graph
         Grafo inferido por build_ontology_graph().
     user_uri : str
-        URI completa do usuário (e.g. "http://amazingvideo.org#Usuario123").
+        URI completa do usuário (e.g. f"{AMAZING_BASE}Usuario123").
 
     Retorna
     -------
@@ -26,7 +28,7 @@ def query_by_preference(rdf_graph: Graph, user_uri: str) -> List[str]:
     """
     # --- complete com SPARQL + UNION ---
     sparql = f"""
-    PREFIX : <http://amazingvideo.org#>
+    PREFIX : <{AMAZING_BASE}>
 
     SELECT DISTINCT ?filme WHERE {{
       {{ <{user_uri}> :prefereTematica ?t .

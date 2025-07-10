@@ -1,10 +1,11 @@
 from rdflib import Graph
 from content_recommender.query_by_preference import query_by_preference
+from src.base_uri import AMAZING_BASE
 
-BASE = "http://amazingvideo.org#"
+BASE = AMAZING_BASE
 
-TTL = """\
-@prefix : <http://amazingvideo.org#> .
+TTL = f"""\
+@prefix : <{BASE}> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 # Usuário com 3 tipos de preferência

@@ -6,6 +6,8 @@ import requests
 import streamlit as st
 from rdflib import Graph, URIRef
 
+from src.base_uri import EX_BASE
+
 from ontology.build_ontology import build_ontology_graph
 from pipeline.generate_logical_recommendations import recommend_logical
 from pipeline.generate_recommendations import generate_recommendations
@@ -40,9 +42,9 @@ def load_catalog() -> pd.DataFrame:
     Observação: prefixamos o parâmetro com _ para que o Streamlit
     não tente hashear o objeto Graph.
     """
-    query = """
-    PREFIX ex: <http://ex.org/stream#>
-    SELECT DISTINCT ?f WHERE { ?f a ex:Filme . }
+    query = f"""
+    PREFIX ex: <{EX_BASE}>
+    SELECT DISTINCT ?f WHERE {{ ?f a ex:Filme . }}
     """
     # usa o grafo global _graph
     uris = [str(r.f) for r in _graph.query(query)]

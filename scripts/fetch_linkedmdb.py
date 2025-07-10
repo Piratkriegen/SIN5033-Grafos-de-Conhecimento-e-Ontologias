@@ -16,8 +16,10 @@ from pathlib import Path
 from rdflib import Graph
 from SPARQLWrapper import SPARQLWrapper, TURTLE
 
+from src.base_uri import EX_BASE
+
 ENDPOINT = "http://data.linkedmdb.org/sparql"
-BASE = "http://ex.org/stream#"
+BASE = EX_BASE
 OUT_PATH = Path("data/raw/linkedmdb_ex.ttl")
 
 

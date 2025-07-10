@@ -3,14 +3,15 @@ from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, OWL
 
 from ontology.build_ontology import load_ontology
+from src.base_uri import EX_BASE
 
 
 def test_load_valid_ontology(tmp_path):
     # 1. Cria um arquivo TTL mínimo
     ttl = tmp_path / "test_ontology.ttl"
     ttl.write_text(
-        """\
-@prefix : <http://ex.org/stream#> .
+        f"""\
+@prefix : <{EX_BASE}> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 
@@ -25,7 +26,7 @@ def test_load_valid_ontology(tmp_path):
     assert isinstance(g, Graph)
 
     # 3. Verifica cada classe
-    base = "http://ex.org/stream#"
+    base = EX_BASE
     for cls in ("Video", "Usuario", "Genero"):
         uri = URIRef(base + cls)
         assert any(
@@ -37,8 +38,8 @@ def test_load_invalid_ontology(tmp_path):
     # 1. Cria um TTL sem a classe Genero
     ttl = tmp_path / "bad_ontology.ttl"
     ttl.write_text(
-        """\
-@prefix : <http://ex.org/stream#> .
+        f"""\
+@prefix : <{EX_BASE}> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 

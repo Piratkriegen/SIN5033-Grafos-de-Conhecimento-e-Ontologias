@@ -4,6 +4,8 @@ from typing import List
 from rdflib import Graph
 import gzip
 
+from src.base_uri import EX_BASE
+
 
 def _load_graph(path: str) -> Graph:
     """Carrega um grafo RDF do caminho fornecido."""
@@ -40,7 +42,7 @@ def recommend_logical(
     """
     graph = _load_graph(ontology_path)
     query = f"""
-    PREFIX ex: <http://ex.org/stream#>
+    PREFIX ex: <{EX_BASE}>
     PREFIX prop: <http://www.wikidata.org/prop/direct/>
     SELECT DISTINCT ?rec WHERE {{
       VALUES ?p {{ prop:P136 prop:P57 prop:P161 }}

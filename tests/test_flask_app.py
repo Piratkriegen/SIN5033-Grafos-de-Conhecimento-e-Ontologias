@@ -2,6 +2,7 @@ import importlib.util
 import pathlib
 
 from rdflib import Graph
+from src.base_uri import EX_BASE
 
 MODULE_PATH = pathlib.Path(__file__).resolve().parents[1] / "app.py"
 spec = importlib.util.spec_from_file_location("flask_app", MODULE_PATH)
@@ -13,8 +14,8 @@ exec(code, module.__dict__)
 load_graph = module.load_graph
 load_catalog = module.load_catalog
 
-TTL = """
-@prefix ex: <http://ex.org/stream#> .
+TTL = f"""
+@prefix ex: <{EX_BASE}> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
 ex:f1 a ex:Filme .
@@ -32,8 +33,8 @@ def test_load_graph_and_catalog(tmp_path):
 
     assert isinstance(g, Graph)
     assert set(df["uri"]) == {
-        "http://ex.org/stream#f1",
-        "http://ex.org/stream#f2",
+        EX_BASE + "f1",
+        EX_BASE + "f2",
     }
 
 

@@ -5,6 +5,8 @@ from rdflib.namespace import RDF, OWL
 from owlrl import DeductiveClosure, OWLRL_Semantics
 import gzip
 
+from src.base_uri import EX_BASE
+
 
 def load_ontology(path: str) -> Graph:
     """
@@ -20,11 +22,10 @@ def load_ontology(path: str) -> Graph:
     fmt = "xml" if path.endswith((".owl", ".rdf", ".xml")) else "turtle"
     g.parse(path, format=fmt)
 
-    base = "http://ex.org/stream#"
     required = {
-        "Video": URIRef(base + "Video"),
-        "Usuario": URIRef(base + "Usuario"),
-        "Genero": URIRef(base + "Genero"),
+        "Video": URIRef(EX_BASE + "Video"),
+        "Usuario": URIRef(EX_BASE + "Usuario"),
+        "Genero": URIRef(EX_BASE + "Genero"),
     }
 
     # Aqui mudamos a verificação:
