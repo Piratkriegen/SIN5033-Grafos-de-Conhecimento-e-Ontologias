@@ -17,8 +17,8 @@ PLACEHOLDER_IMG = "https://placehold.co/200x300?text=Poster"
 
 app = Flask(__name__)
 
-graph: Graph
-catalog_df: pd.DataFrame
+graph: Graph | None = None
+catalog_df: pd.DataFrame | None = None
 
 
 def load_graph(path: str = DATA_PATH) -> Graph:
@@ -185,13 +185,14 @@ def index():
     )
 
 
-def _init_app() -> None:
+@app.before_request
+def init_graph() -> None:
+    """Carrega grafo e catálogo apenas na primeira requisição."""
     global graph, catalog_df
-    graph = load_graph()
-    catalog_df = load_catalog()
+    if graph is None:
+        graph = load_graph()
+        catalog_df = load_catalog()
 
-
-_init_app()
 
 if __name__ == "__main__":
     app.run(debug=True)
