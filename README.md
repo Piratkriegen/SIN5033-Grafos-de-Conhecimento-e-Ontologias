@@ -6,7 +6,7 @@ Este repositório implementa um sistema de recomendação de filmes baseado em g
 
 - `ontology/` &ndash; carregamento da ontologia e inferência com `owlrl`.
 - `content_recommender/` &ndash; consultas SPARQL para recomendações por preferência.
-- `collaborative_recommender/` &ndash; wrapper simples em Python para filtros colaborativos (`SurpriseRS`).
+- `src/recommender/recommenders/` &ndash; wrapper simples em Python para filtros colaborativos (`SurpriseRS`).
 - `serendipity/` &ndash; cálculo de métricas de grafo (centralidade, distância etc.).
 - `pipeline/` &ndash; orquestração do fluxo de recomendação e reranqueamento.
 - `interface/` e `streamlit_app.py` &ndash; interface web em Streamlit.
