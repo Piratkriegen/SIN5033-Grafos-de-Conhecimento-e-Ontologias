@@ -1,3 +1,4 @@
+from ontology.build_ontology import build_ontology_graph
 from pipeline.generate_recommendations import generate_recommendations
 
 BASE = "http://ex.org/stream#"
@@ -44,8 +45,15 @@ def test_generate_recommendations_basic(tmp_path, monkeypatch):
         fake_predict,
     )
 
+    graph = build_ontology_graph(str(path))
     recs = generate_recommendations(
-        "user1", ratings, str(path), top_n=2, alpha=1.0, beta=0.0
+        "user1",
+        ratings,
+        str(path),
+        top_n=2,
+        alpha=1.0,
+        beta=0.0,
+        rdf_graph=graph,
     )
 
     assert recs[0] == "videoB"

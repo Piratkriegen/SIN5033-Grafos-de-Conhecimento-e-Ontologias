@@ -1,5 +1,6 @@
 import pytest
 from rdflib import URIRef
+from ontology.build_ontology import build_ontology_graph
 from pipeline.generate_recommendations import generate_recommendations
 
 # teste de integração usando o dump real de filmes
@@ -17,6 +18,7 @@ def test_generate_recommendations_real_dump():
     }
 
     # gera recomendações
+    graph = build_ontology_graph("data/raw/serendipity_films_full.ttl.gz")
     recs = generate_recommendations(
         user_id=user_id,
         ratings=ratings,
@@ -24,6 +26,7 @@ def test_generate_recommendations_real_dump():
         top_n=5,
         alpha=1.0,
         beta=0.0,
+        rdf_graph=graph,
     )
 
     # retorna lista de strings com tamanho 5

@@ -1,4 +1,5 @@
 import pytest
+from ontology.build_ontology import build_ontology_graph
 from pipeline.generate_logical_recommendations import recommend_logical
 
 TTL = """
@@ -21,10 +22,12 @@ def test_recommend_logical_basic(tmp_path):
     f = tmp_path / "graph.ttl"
     f.write_text(TTL)
 
+    graph = build_ontology_graph(str(f))
     recs = recommend_logical(
         "http://ex.org/stream#f1",
         ontology_path=str(f),
         top_n=5,
+        rdf_graph=graph,
     )
     assert "http://ex.org/stream#f2" in recs
     assert "http://ex.org/stream#f1" not in recs
@@ -34,10 +37,12 @@ def test_recommend_logical_no_match(tmp_path):
     f = tmp_path / "graph.ttl"
     f.write_text(TTL)
 
+    graph = build_ontology_graph(str(f))
     recs = recommend_logical(
         "http://ex.org/stream#f3",
         ontology_path=str(f),
         top_n=5,
+        rdf_graph=graph,
     )
     assert recs == []
 
