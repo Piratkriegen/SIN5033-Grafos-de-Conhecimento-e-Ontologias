@@ -30,7 +30,8 @@ def test_load_graph_and_catalog(tmp_path):
 
     # Act
     g = load_graph(path=str(f))
-    df = load_catalog(g)
+    module._graph = g
+    df = load_catalog()
 
     # Assert
     assert isinstance(g, Graph)
