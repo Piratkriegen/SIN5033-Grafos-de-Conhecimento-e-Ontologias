@@ -21,6 +21,7 @@ SPARQLWrapper>=2.0
 
 # front-end interativo
 streamlit>=1.18
+Flask>=2.0
 
 # plotting de métricas e resultados
 matplotlib>=3.5

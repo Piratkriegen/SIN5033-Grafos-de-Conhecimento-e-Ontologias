@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from typing import List
-from rdflib import Graph, URIRef
-from rdflib.namespace import RDF
+from rdflib import Graph
 import gzip
 
 
@@ -18,7 +17,11 @@ def _load_graph(path: str) -> Graph:
     return g
 
 
-def recommend_logical(uri: str, ontology_path: str, top_n: int = 5) -> List[str]:
+def recommend_logical(
+    uri: str,
+    ontology_path: str,
+    top_n: int = 5,
+) -> List[str]:
     """Retorna filmes logicamente relacionados.
 
     Parameters
