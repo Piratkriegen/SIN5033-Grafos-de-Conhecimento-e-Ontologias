@@ -12,14 +12,13 @@ from ontology.build_ontology import build_ontology_graph
 
 from content_recommender.query_by_preference import query_by_preference
 from collaborative_recommender.surprise_rs import SurpriseRS
+from src.base_uri import EX_BASE
 
 # from serendipity.distance import compute_avg_shortest_path_length
 from serendipity.centrality import compute_betweenness
 from .engine import rerank
 
 import networkx as nx
-
-BASE = "http://ex.org/stream#"
 
 
 def _build_graph(rdf_graph: Graph) -> nx.Graph:
@@ -90,16 +89,16 @@ def generate_recommendations(
     # 2. Seleciona candidatos via content-based (SPARQL)
     #    usando as preferências do usuário na ontologia inferida
 
-    user_uri = BASE + str(user_id)
+    user_uri = EX_BASE + str(user_id)
     # retorna lista de local-names, ex: ["videoA","videoB"]
     candidate_names = query_by_preference(rdf_graph, user_uri)
     # converte de volta para URIRefs
-    candidates = [URIRef(BASE + name) for name in candidate_names]
+    candidates = [URIRef(EX_BASE + name) for name in candidate_names]
 
     # (Opcional) Se não houver candidato por filtro de conteúdo,
     # pode-se cair em todos os filmes:
     if not candidates:
-        video_class = URIRef(BASE + "Filme")
+        video_class = URIRef(EX_BASE + "Filme")
         triples = rdf_graph.triples((None, RDF.type, video_class))
         candidates = [subj for subj, _, _ in triples]
 
@@ -107,7 +106,7 @@ def generate_recommendations(
     rs = SurpriseRS()
     # converte itens de ratings para URIRefs para compatibilidade
     ratings_uri = {
-        (u, URIRef(BASE + i) if not isinstance(i, URIRef) else i): r
+        (u, URIRef(EX_BASE + i) if not isinstance(i, URIRef) else i): r
         for (u, i), r in ratings.items()
     }
     rs.fit(ratings_uri)

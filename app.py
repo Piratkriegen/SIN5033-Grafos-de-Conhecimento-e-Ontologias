@@ -7,6 +7,8 @@ import requests
 from flask import Flask, render_template, request
 from rdflib import Graph, URIRef
 
+from src.base_uri import EX_BASE
+
 from ontology.build_ontology import build_ontology_graph
 from pipeline.generate_logical_recommendations import recommend_logical
 from pipeline.generate_recommendations import generate_recommendations
@@ -39,9 +41,9 @@ def load_graph(path: str = DATA_PATH) -> Graph:
 
 def load_catalog() -> pd.DataFrame:
     """Lista todos os filmes presentes no grafo global."""
-    query = """
-    PREFIX ex: <http://ex.org/stream#>
-    SELECT DISTINCT ?f WHERE { ?f a ex:Filme . }
+    query = f"""
+    PREFIX ex: <{EX_BASE}>
+    SELECT DISTINCT ?f WHERE {{ ?f a ex:Filme . }}
     """
     uris = [str(r.f) for r in graph.query(query)]
     return pd.DataFrame({"uri": uris})

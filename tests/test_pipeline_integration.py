@@ -2,11 +2,12 @@
 
 from collaborative_recommender.surprise_rs import SurpriseRS
 from pipeline.generate_recommendations import generate_recommendations
+from src.base_uri import EX_BASE
 
-BASE = "http://ex.org/stream#"
+BASE = EX_BASE
 
-TTL = """\
-@prefix : <http://ex.org/stream#> .
+TTL = f"""\
+@prefix : <{BASE}> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 

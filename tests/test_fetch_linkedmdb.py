@@ -1,7 +1,8 @@
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF
+from src.base_uri import EX_BASE
 
-BASE = "http://ex.org/stream#"
+BASE = EX_BASE
 
 
 def test_linkedmdb_contains_filme():

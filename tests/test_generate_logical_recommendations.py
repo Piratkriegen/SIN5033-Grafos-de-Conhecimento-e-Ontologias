@@ -1,8 +1,9 @@
 import pytest
 from pipeline.generate_logical_recommendations import recommend_logical
+from src.base_uri import EX_BASE
 
-TTL = """
-@prefix ex: <http://ex.org/stream#> .
+TTL = f"""
+@prefix ex: <{EX_BASE}> .
 @prefix prop: <http://www.wikidata.org/prop/direct/> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 
@@ -22,12 +23,12 @@ def test_recommend_logical_basic(tmp_path):
     f.write_text(TTL)
 
     recs = recommend_logical(
-        "http://ex.org/stream#f1",
+        EX_BASE + "f1",
         ontology_path=str(f),
         top_n=5,
     )
-    assert "http://ex.org/stream#f2" in recs
-    assert "http://ex.org/stream#f1" not in recs
+    assert EX_BASE + "f2" in recs
+    assert EX_BASE + "f1" not in recs
 
 
 def test_recommend_logical_no_match(tmp_path):
@@ -35,7 +36,7 @@ def test_recommend_logical_no_match(tmp_path):
     f.write_text(TTL)
 
     recs = recommend_logical(
-        "http://ex.org/stream#f3",
+        EX_BASE + "f3",
         ontology_path=str(f),
         top_n=5,
     )
@@ -45,6 +46,6 @@ def test_recommend_logical_no_match(tmp_path):
 def test_recommend_logical_invalid_path():
     with pytest.raises(Exception):
         recommend_logical(
-            "http://ex.org/stream#f1",
+            EX_BASE + "f1",
             ontology_path="no_file.ttl",
         )

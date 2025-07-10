@@ -8,8 +8,7 @@ from .graph_builder import build_graph
 from serendipity.distance import compute_avg_shortest_path_length
 from .recommenders.surprise_rs import SurpriseRS
 from .engine import rerank
-
-BASE = "http://ex.org/stream#"
+from src.base_uri import EX_BASE
 
 
 def generate_recommendations(
@@ -30,7 +29,7 @@ def generate_recommendations(
 
     # 3. Identifica apenas as instâncias de vídeo
     #    (filtrando por rdf:type :Video)
-    video_class = URIRef(BASE + "Video")
+    video_class = URIRef(EX_BASE + "Video")
     video_nodes = [
         subj for subj, _, _ in rdf_graph.triples((None, RDF.type, video_class))
     ]

@@ -4,6 +4,8 @@
 from rdflib import Graph, URIRef
 import networkx as nx
 
+from src.base_uri import EX_BASE
+
 
 def build_graph(rdf_graph: Graph) -> nx.Graph:
     """
@@ -12,8 +14,8 @@ def build_graph(rdf_graph: Graph) -> nx.Graph:
     Deve:
       1. Iterar sobre triplas ``(s, p, o)`` em ``rdf_graph``;
       2. Para cada tripla onde ``p`` seja
-         ``http://ex.org/stream#assiste`` ou
-         ``http://ex.org/stream#pertenceAGenero``, adicionar nós para ``s``
+         ``EX_BASE + 'assiste'`` ou
+         ``EX_BASE + 'pertenceAGenero'``, adicionar nós para ``s``
          e ``o`` e uma aresta ``(s, o)``;
       3. Retornar o grafo ``networkx`` resultante.
     """
@@ -21,8 +23,8 @@ def build_graph(rdf_graph: Graph) -> nx.Graph:
     grafo = nx.Graph()
 
     predicates = [
-        URIRef("http://ex.org/stream#assiste"),
-        URIRef("http://ex.org/stream#pertenceAGenero"),
+        URIRef(EX_BASE + "assiste"),
+        URIRef(EX_BASE + "pertenceAGenero"),
     ]
 
     for predicate_uri in predicates:
