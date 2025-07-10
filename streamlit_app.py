@@ -36,25 +36,18 @@ def load_graph(path: str = DATA_PATH) -> Graph:
 
 
 @st.cache_data
-def load_catalog(graph: Graph) -> pd.DataFrame:
-    """Lista todos os filmes presentes no grafo.
-
-    Parâmetros
-    ----------
-    graph : Graph
-        Grafo já carregado.
-
-    Retorna
-    -------
-    pd.DataFrame
-        DataFrame contendo as URIs dos filmes.
+def load_catalog(_graph: Graph) -> pd.DataFrame:
     """
-
+    Lista todos os filmes presentes no grafo.
+    Observação: prefixamos o parâmetro com _ para que o Streamlit
+    não tente hashear o objeto Graph.
+    """
     query = """
     PREFIX ex: <http://ex.org/stream#>
     SELECT DISTINCT ?f WHERE { ?f a ex:Filme . }
     """
-    uris = [str(r.f) for r in graph.query(query)]
+    # aqui usamos _graph em vez de graph
+    uris = [str(r.f) for r in _graph.query(query)]
     return pd.DataFrame({"uri": uris})
 
 
