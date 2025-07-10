@@ -194,5 +194,11 @@ def init_graph() -> None:
         catalog_df = load_catalog()
 
 
+def create_flask_app() -> Flask:
+    """Retorna a aplicação Flask configurada."""
+
+    return app
+
+
 if __name__ == "__main__":
     app.run(debug=True)
