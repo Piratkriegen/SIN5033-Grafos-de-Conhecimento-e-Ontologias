@@ -1,4 +1,4 @@
-# src/recommender/ontology_loader.py
+"""Utilidades para carregamento e inferência de ontologias."""
 
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, OWL
@@ -7,14 +7,23 @@ import gzip
 
 
 def load_ontology(path: str) -> Graph:
-    """
-    path: caminho para arquivo .ttl ou .owl
-    retorna: um RDFLib Graph com todos os axiomas carregados
+    """Carrega e valida uma ontologia.
+
+    Parameters
+    ----------
+    path : str
+        Caminho para arquivo ``.ttl`` ou ``.owl``.
+
+    Returns
+    -------
+    Graph
+        Grafo carregado com axiomas explícitos.
 
     Raises
     ------
     ValueError
-        Se :Video, :Usuario ou :Genero não estiverem definidos como classes.
+        Se ``:Video``, ``:Usuario`` ou ``:Genero`` não estiverem
+        definidos como classes.
     """
     g = Graph()
     fmt = "xml" if path.endswith((".owl", ".rdf", ".xml")) else "turtle"
@@ -37,9 +46,18 @@ def load_ontology(path: str) -> Graph:
 
 
 def build_ontology_graph(ontology_path: str) -> Graph:
-    """
-    Carrega uma ontologia (TTL, OWL ou TTL.GZ), executa inferências OWL RL
-    e retorna um rdflib.Graph com axiomas explícitos e inferidos.
+    """Executa inferência OWL RL e retorna o grafo completo.
+
+    Parameters
+    ----------
+    ontology_path : str
+        Caminho para o arquivo de ontologia. Pode ser ``.ttl``, ``.owl`` ou
+        versões compactadas ``.gz``.
+
+    Returns
+    -------
+    Graph
+        Grafo com axiomas explícitos e inferidos.
     """
     g = Graph()
 
