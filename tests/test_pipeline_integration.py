@@ -1,6 +1,7 @@
 # tests/test_pipeline_integration.py
 
 from collaborative_recommender.surprise_rs import SurpriseRS
+from ontology.build_ontology import build_ontology_graph
 from pipeline.generate_recommendations import generate_recommendations
 
 BASE = "http://ex.org/stream#"
@@ -49,6 +50,7 @@ def test_full_pipeline(tmp_path, monkeypatch):
 
     monkeypatch.setattr(SurpriseRS, "predict", fake_predict)
 
+    graph = build_ontology_graph(str(f))
     # 3. Chamamos o pipeline
     recs = generate_recommendations(
         user_id="user1",
@@ -57,6 +59,7 @@ def test_full_pipeline(tmp_path, monkeypatch):
         top_n=3,
         alpha=1.0,  # só novelty
         beta=0.0,  # ignora relevance
+        rdf_graph=graph,
     )
 
     # 4. Como só novelty conta, videoB (maior distância) vem antes de C

@@ -58,6 +58,7 @@ def generate_recommendations(
     alpha: float = 0.5,
     beta: float = 0.5,
     novelty_metric: str = "betweenness",
+    rdf_graph: Graph | None = None,
 ) -> List[str]:
     """Gera recomendações híbridas baseadas em conteúdo e colaboração.
 
@@ -78,6 +79,10 @@ def generate_recommendations(
     novelty_metric : str
         Métrica de novidade a ser utilizada.
 
+    rdf_graph : Graph | None, optional
+        Grafo RDF pré-carregado. Se ``None``, o grafo será construído a
+        partir de ``ontology_path``.
+
     Returns
     -------
     List[str]
@@ -85,7 +90,8 @@ def generate_recommendations(
     """
 
     # 1. Carrega o grafo com inferência
-    rdf_graph = build_ontology_graph(ontology_path)
+    if rdf_graph is None:
+        rdf_graph = build_ontology_graph(ontology_path)
 
     # 2. Seleciona candidatos via content-based (SPARQL)
     #    usando as preferências do usuário na ontologia inferida
