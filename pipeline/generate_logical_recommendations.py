@@ -1,3 +1,5 @@
+"""Geração de recomendações por lógica de descrição."""
+
 from __future__ import annotations
 
 from typing import List
@@ -6,7 +8,18 @@ import gzip
 
 
 def _load_graph(path: str) -> Graph:
-    """Carrega um grafo RDF do caminho fornecido."""
+    """Carrega um grafo RDF.
+
+    Parameters
+    ----------
+    path : str
+        Caminho para o arquivo do grafo, opcionalmente compactado.
+
+    Returns
+    -------
+    Graph
+        Instância carregada de ``rdflib.Graph``.
+    """
     g = Graph()
     if path.endswith(".gz"):
         with gzip.open(path, "rt", encoding="utf-8") as f:

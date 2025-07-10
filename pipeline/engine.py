@@ -1,5 +1,4 @@
-# arquivo: src/recommender/engine.py
-# Python 3
+"""Rotinas de reordenação para recomendações."""
 
 from typing import List, Dict, Any
 
@@ -15,7 +14,7 @@ def rerank(
     Reordena uma lista de candidatos por serendipidade:
       score(item) = alpha * novelty[item] + beta * relevance[item]
 
-    Parametros
+    Parâmetros
     ----------
     candidates : List[Any]
         Itens a serem rankeados.
