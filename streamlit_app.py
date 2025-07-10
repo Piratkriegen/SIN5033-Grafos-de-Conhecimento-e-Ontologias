@@ -1,6 +1,4 @@
 from __future__ import annotations
-
-import urllib.parse
 from typing import List, Tuple
 
 import pandas as pd
@@ -102,6 +100,12 @@ def fetch_image(uri: str) -> str:
     return PLACEHOLDER_IMG
 
 
+def set_selected_uri(uri: str) -> None:
+    """Atualiza o filme escolhido na sessão."""
+
+    st.session_state.selected_uri = uri
+
+
 def get_details(graph: Graph, uri: str) -> dict[str, List[str]]:
     """Coleta gêneros, diretores e elenco do grafo local."""
 
@@ -134,12 +138,19 @@ def _show_row_of_posters(uri_list: List[str]) -> None:
     for col, uri in zip(cols, uri_list):
         title, _ = fetch_label_year(uri)
         img = fetch_image(uri)
-        link = "?selected_uri=" + urllib.parse.quote(uri, safe="")
-        html = (
-            f'<a href="{link}"><img src="{img}" style="width:100%"></a>'
-            f"\n<div style='text-align:center'>{title}</div>"
+        if col.button(
+            f"![]({img})",
+            key=f"poster_{uri}",
+            help=title,
+            on_click=set_selected_uri,
+            args=(uri,),
+            use_container_width=True,
+        ):
+            pass
+        col.markdown(
+            f"<div style='text-align:center'>{title}</div>",
+            unsafe_allow_html=True,
         )
-        col.markdown(html, unsafe_allow_html=True)
 
 
 # --- Configuração inicial ---
@@ -147,11 +158,8 @@ def _show_row_of_posters(uri_list: List[str]) -> None:
 graph = load_graph()
 catalog_df = load_catalog(graph)
 
-params = st.experimental_get_query_params()
-if "selected_uri" in params:
-    st.session_state.selected_uri = params["selected_uri"][0]
-    st.experimental_set_query_params()
-    st.experimental_rerun()
+if "selected_uri" not in st.session_state:
+    st.session_state.selected_uri = None
 
 st.title("Amazing Video Recommender")
 
