@@ -5,9 +5,7 @@ import importlib.util
 import pathlib
 
 MODULE_PATH = (
-    pathlib.Path(__file__).resolve().parents[1]
-    / "interface"
-    / "streamlit_app.py"
+    pathlib.Path(__file__).resolve().parents[1] / "interface" / "streamlit_app.py"
 )
 spec = importlib.util.spec_from_file_location("_app", MODULE_PATH)
 module = importlib.util.module_from_spec(spec)
