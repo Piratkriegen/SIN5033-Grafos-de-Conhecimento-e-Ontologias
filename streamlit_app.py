@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import urllib.parse
 from typing import List, Tuple
 
 import pandas as pd
@@ -36,12 +35,12 @@ def load_graph(path: str = DATA_PATH) -> Graph:
 
 
 @st.cache_data
-def load_catalog(graph: Graph) -> pd.DataFrame:
+def load_catalog(_graph: Graph) -> pd.DataFrame:
     """Lista todos os filmes presentes no grafo.
 
     Parâmetros
     ----------
-    graph : Graph
+    _graph : Graph
         Grafo já carregado.
 
     Retorna
@@ -54,7 +53,7 @@ def load_catalog(graph: Graph) -> pd.DataFrame:
     PREFIX ex: <http://ex.org/stream#>
     SELECT DISTINCT ?f WHERE { ?f a ex:Filme . }
     """
-    uris = [str(r.f) for r in graph.query(query)]
+    uris = [str(r.f) for r in _graph.query(query)]
     return pd.DataFrame({"uri": uris})
 
 
@@ -134,6 +133,12 @@ def get_details(graph: Graph, uri: str) -> dict[str, List[str]]:
     return {"genres": genres, "directors": directors, "cast": cast}
 
 
+def _select_uri(uri: str) -> None:
+    """Atualiza a URI escolhida na sessão."""
+
+    st.session_state.selected_uri = uri
+
+
 def _show_row_of_posters(uri_list: List[str]) -> None:
     """Exibe uma fileira de capas clicáveis."""
 
@@ -141,12 +146,14 @@ def _show_row_of_posters(uri_list: List[str]) -> None:
     for col, uri in zip(cols, uri_list):
         title, _ = fetch_label_year(uri)
         img = fetch_image(uri)
-        link = "?selected_uri=" + urllib.parse.quote(uri, safe="")
-        html = (
-            f'<a href="{link}"><img src="{img}" style="width:100%"></a>'
-            f"\n<div style='text-align:center'>{title}</div>"
+        col.image(img, use_column_width=True)
+        col.button(
+            title,
+            key=uri,
+            on_click=_select_uri,
+            args=(uri,),
+            use_container_width=True,
         )
-        col.markdown(html, unsafe_allow_html=True)
 
 
 # --- Configuração inicial ---
@@ -154,11 +161,8 @@ def _show_row_of_posters(uri_list: List[str]) -> None:
 graph = load_graph()
 catalog_df = load_catalog(graph)
 
-params = st.experimental_get_query_params()
-if "selected_uri" in params:
-    st.session_state.selected_uri = params["selected_uri"][0]
-    st.experimental_set_query_params()
-    st.experimental_rerun()
+if "selected_uri" not in st.session_state:
+    st.session_state.selected_uri = None
 
 st.title("Amazing Video Recommender")
 
