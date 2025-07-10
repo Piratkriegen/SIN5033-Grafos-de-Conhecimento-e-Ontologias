@@ -58,6 +58,7 @@ def generate_recommendations(
     alpha: float = 0.5,
     beta: float = 0.5,
     novelty_metric: str = "betweenness",
+    rdf_graph: Graph | None = None,
 ) -> List[str]:
     """Gera recomendações híbridas baseadas em conteúdo e colaboração.
 
@@ -69,6 +70,8 @@ def generate_recommendations(
         Avaliações conhecidas.
     ontology_path : str
         Caminho para o arquivo de ontologia.
+    rdf_graph : Graph, optional
+        Grafo já inferido para reutilização.
     top_n : int
         Número máximo de itens retornados.
     alpha : float
@@ -84,8 +87,14 @@ def generate_recommendations(
         Lista de identificadores de vídeo.
     """
 
-    # 1. Carrega o grafo com inferência
-    rdf_graph = build_ontology_graph(ontology_path)
+    # 1. Carrega o grafo com inferência (opcionalmente reutiliza existente)
+    # fmt: off
+    rdf_graph = (
+        rdf_graph
+        if rdf_graph is not None
+        else build_ontology_graph(ontology_path)
+    )
+    # fmt: on
 
     # 2. Seleciona candidatos via content-based (SPARQL)
     #    usando as preferências do usuário na ontologia inferida
