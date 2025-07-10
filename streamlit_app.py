@@ -34,7 +34,7 @@ def load_graph(path: str = DATA_PATH) -> Graph:
 
 
 @st.cache_data
-def load_catalog(_graph: Graph) -> pd.DataFrame:
+def load_catalog() -> pd.DataFrame:
     """
     Lista todos os filmes presentes no grafo.
     Observação: prefixamos o parâmetro com _ para que o Streamlit
@@ -44,11 +44,12 @@ def load_catalog(_graph: Graph) -> pd.DataFrame:
     PREFIX ex: <http://ex.org/stream#>
     SELECT DISTINCT ?f WHERE { ?f a ex:Filme . }
     """
-    # aqui usamos _graph em vez de graph
+    # usa o grafo global _graph
     uris = [str(r.f) for r in _graph.query(query)]
     return pd.DataFrame({"uri": uris})
 
 
+@st.cache_data(show_spinner=False)
 def fetch_label_year(uri: str) -> Tuple[str, str | None]:
     """Obtém rótulo e ano via Wikidata."""
 
@@ -79,6 +80,7 @@ def fetch_label_year(uri: str) -> Tuple[str, str | None]:
     return qid, None
 
 
+@st.cache_data(show_spinner=False)
 def fetch_image(uri: str) -> str:
     """Retorna URL da imagem (P18) do item no Wikidata."""
 
@@ -98,12 +100,6 @@ def fetch_image(uri: str) -> str:
     except Exception:
         pass
     return PLACEHOLDER_IMG
-
-
-def set_selected_uri(uri: str) -> None:
-    """Atualiza o filme escolhido na sessão."""
-
-    st.session_state.selected_uri = uri
 
 
 def get_details(graph: Graph, uri: str) -> dict[str, List[str]]:
@@ -138,25 +134,19 @@ def _show_row_of_posters(uri_list: List[str]) -> None:
     for col, uri in zip(cols, uri_list):
         title, _ = fetch_label_year(uri)
         img = fetch_image(uri)
-        if col.button(
-            f"![]({img})",
-            key=f"poster_{uri}",
-            help=title,
-            on_click=set_selected_uri,
-            args=(uri,),
-            use_container_width=True,
-        ):
-            pass
+        col.image(img, use_column_width=True)
         col.markdown(
             f"<div style='text-align:center'>{title}</div>",
             unsafe_allow_html=True,
         )
+        if col.button("Ver detalhes", key=f"poster_{uri}"):
+            st.session_state.selected_uri = uri
 
 
 # --- Configuração inicial ---
 
-graph = load_graph()
-catalog_df = load_catalog(graph)
+_graph = load_graph()
+catalog_df = load_catalog()
 
 if "selected_uri" not in st.session_state:
     st.session_state.selected_uri = None
@@ -180,7 +170,7 @@ selected_uri = st.session_state.get("selected_uri")
 if selected_uri:
     title, year = fetch_label_year(selected_uri)
     st.header(f"{title} ({year or 'N/A'})")
-    details = get_details(graph, selected_uri)
+    details = get_details(_graph, selected_uri)
     if details["genres"]:
         st.markdown("**Gêneros:** " + ", ".join(details["genres"]))
     if details["directors"]:
