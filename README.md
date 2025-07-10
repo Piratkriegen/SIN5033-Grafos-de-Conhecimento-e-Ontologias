@@ -28,6 +28,13 @@ Instale as dependências uma vez:
 pip install -r requirements.txt
 ```
 
+Para evitar chamadas repetidas ao Wikidata, gere um cache local de
+metadados (rótulo e ano) executando:
+
+```bash
+python scripts/cache_metadata.py
+```
+
 Interface Streamlit:
 
 ```bash

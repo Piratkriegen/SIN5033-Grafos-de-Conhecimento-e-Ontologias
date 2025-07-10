@@ -1,6 +1,9 @@
 from __future__ import annotations
 from typing import List, Tuple
 
+import json
+from pathlib import Path
+
 import pandas as pd
 import requests
 import streamlit as st
@@ -13,6 +16,20 @@ from pipeline.generate_recommendations import generate_recommendations
 DATA_PATH = "data/raw/serendipity_films_full.ttl.gz"
 WIKIDATA_URL = "https://query.wikidata.org/sparql"
 PLACEHOLDER_IMG = "https://placehold.co/200x300?text=Poster"
+METADATA_PATH = Path("data/metadata.json")
+
+
+def load_metadata(path: Path = METADATA_PATH) -> dict[str, dict[str, str | None]]:
+    """Carrega o cache de metadados, se existir."""
+
+    try:
+        with path.open(encoding="utf-8") as fh:
+            return json.load(fh)
+    except Exception:
+        return {}
+
+
+METADATA = load_metadata()
 
 
 @st.cache_resource
@@ -51,7 +68,11 @@ def load_catalog() -> pd.DataFrame:
 
 @st.cache_data(show_spinner=False)
 def fetch_label_year(uri: str) -> Tuple[str, str | None]:
-    """Obtém rótulo e ano via Wikidata."""
+    """Obtém rótulo e ano via cache ou Wikidata."""
+
+    cached = METADATA.get(uri)
+    if cached:
+        return cached.get("label", uri.split("/")[-1]), cached.get("year")
 
     qid = uri.split("/")[-1]
     query = f"""
@@ -137,7 +158,7 @@ st.title("Amazing Video Recommender")
 selected = st.selectbox(
     "\U0001f50d Selecione um filme",
     options=catalog_df["uri"],
-    format_func=lambda u: fetch_label_year(u)[0],
+    format_func=lambda u: METADATA.get(u, {}).get("label", u.split("/")[-1]),
 )
 
 if selected:
