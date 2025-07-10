@@ -11,7 +11,7 @@ from rdflib.namespace import RDF
 from ontology.build_ontology import build_ontology_graph
 
 from content_recommender.query_by_preference import query_by_preference
-from collaborative_recommender.surprise_rs import SurpriseRS
+from src.recommender.recommenders.surprise_rs import SurpriseRS
 
 # from serendipity.distance import compute_avg_shortest_path_length
 from serendipity.centrality import compute_betweenness

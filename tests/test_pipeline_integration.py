@@ -1,6 +1,6 @@
 # tests/test_pipeline_integration.py
 
-from collaborative_recommender.surprise_rs import SurpriseRS
+from src.recommender.recommenders.surprise_rs import SurpriseRS
 from pipeline.generate_recommendations import generate_recommendations
 
 BASE = "http://ex.org/stream#"
