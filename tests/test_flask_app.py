@@ -3,9 +3,13 @@ import pathlib
 
 from rdflib import Graph
 
+# fmt: off
 MODULE_PATH = (
-    pathlib.Path(__file__).resolve().parents[1] / "interface" / "app.py"
+    pathlib.Path(__file__).resolve().parents[1]
+    / "interface"
+    / "app.py"
 )
+# fmt: on
 spec = importlib.util.spec_from_file_location("flask_app", MODULE_PATH)
 module = importlib.util.module_from_spec(spec)
 with open(MODULE_PATH, "r", encoding="utf-8") as fh:
