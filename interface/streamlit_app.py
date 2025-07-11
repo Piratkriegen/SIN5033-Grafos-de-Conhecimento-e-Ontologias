@@ -9,7 +9,6 @@ from rdflib import Graph, URIRef
 
 from ontology.build_ontology import build_ontology_graph
 from pipeline.generate_logical_recommendations import recommend_logical
-from pipeline.generate_recommendations import generate_recommendations
 
 DATA_PATH = "data/raw/serendipity_films_full.ttl.gz"
 WIKIDATA_URL = "https://query.wikidata.org/sparql"
@@ -53,7 +52,9 @@ def load_catalog() -> pd.DataFrame:
 
 
 @st.cache_data(show_spinner=False)
-def load_metadata(path: str = METADATA_PATH) -> Dict[str, Dict[str, str | None]]:
+def load_metadata(
+    path: str = METADATA_PATH,
+) -> Dict[str, Dict[str, str | None]]:
     """Carrega rótulos e anos pré-processados."""
 
     try:
@@ -189,22 +190,5 @@ if selected:
     recs_log = recommend_logical(selected, DATA_PATH, rdf_graph=_graph)
     cols = st.columns(len(recs_log))
     for col, uri in zip(cols, recs_log):
-        img = fetch_image(uri)
-        col.image(img, caption=fetch_label_year(uri)[0], use_column_width=True)
-
-    st.subheader("Ou se surpreenda com…")
-    ratings = {(user, URIRef(u)): 5.0 for u in watched}
-    recs_ser = generate_recommendations(
-        user,
-        ratings,
-        DATA_PATH,
-        top_n=5,
-        alpha=1.0,
-        beta=0.0,
-        rdf_graph=_graph,
-    )
-    cols = st.columns(len(recs_ser))
-    for col, qid in zip(cols, recs_ser):
-        uri = f"http://www.wikidata.org/entity/{qid}"
         img = fetch_image(uri)
         col.image(img, caption=fetch_label_year(uri)[0], use_column_width=True)

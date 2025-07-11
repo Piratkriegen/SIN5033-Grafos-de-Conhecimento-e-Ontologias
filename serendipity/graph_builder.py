@@ -1,4 +1,4 @@
-# arquivo: src/recommender/graph_builder.py
+# serendipity/graph_builder.py
 # Python 3
 
 from rdflib import Graph, URIRef

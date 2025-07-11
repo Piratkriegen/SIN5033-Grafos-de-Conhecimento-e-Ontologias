@@ -40,7 +40,7 @@ def test_generate_recommendations_basic(tmp_path, monkeypatch):
 
     # Aqui o caminho correto para o seu wrapper simples
     monkeypatch.setattr(
-        "src.recommender.recommenders.surprise_rs.SurpriseRS.predict",
+        "collaborative_recommender.surprise_rs.SurpriseRS.predict",
         fake_predict,
     )
 
