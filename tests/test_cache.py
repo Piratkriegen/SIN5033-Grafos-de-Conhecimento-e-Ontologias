@@ -77,7 +77,7 @@ def test_generate_recommendations_reuses_graph(tmp_path, monkeypatch):
         return {item: 1.0 for item in items}
 
     monkeypatch.setattr(
-        "collaborative_recommender.surprise_rs.SurpriseRS.predict",
+        "src.recommender.recommenders.surprise_rs.SurpriseRS.predict",
         fake_predict,
     )
 
@@ -87,3 +87,37 @@ def test_generate_recommendations_reuses_graph(tmp_path, monkeypatch):
     generate_recommendations("user1", ratings, str(path), top_n=1, rdf_graph=g)
 
     assert loader_calls["count"] == 0
+
+
+def test_global_cache_recommend_logical(tmp_path):
+    path = tmp_path / "g.ttl"
+    path.write_text(TTL_LOGICAL)
+    from pipeline import generate_logical_recommendations as mod
+
+    mod.clear_cache()
+    recommend_logical("http://ex.org/stream#f1", str(path))
+    recommend_logical("http://ex.org/stream#f1", str(path))
+
+    assert len(mod._GRAPH_CACHE) == 1
+
+
+def test_global_cache_generate_recommendations(tmp_path, monkeypatch):
+    path = tmp_path / "g.ttl"
+    path.write_text(TTL_PIPELINE)
+
+    def fake_predict(self, user_id, items):
+        return {item: 1.0 for item in items}
+
+    monkeypatch.setattr(
+        "src.recommender.recommenders.surprise_rs.SurpriseRS.predict",
+        fake_predict,
+    )
+
+    from pipeline import generate_recommendations as mod
+
+    mod.clear_cache()
+    ratings = {("user1", "videoA"): 5.0}
+    generate_recommendations("user1", ratings, str(path), top_n=1)
+    generate_recommendations("user1", ratings, str(path), top_n=1)
+
+    assert len(mod._GRAPH_CACHE) == 1

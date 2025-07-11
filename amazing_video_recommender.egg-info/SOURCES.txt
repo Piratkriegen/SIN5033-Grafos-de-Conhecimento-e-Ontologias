@@ -6,8 +6,6 @@ amazing_video_recommender.egg-info/PKG-INFO
 amazing_video_recommender.egg-info/SOURCES.txt
 amazing_video_recommender.egg-info/dependency_links.txt
 amazing_video_recommender.egg-info/top_level.txt
-collaborative_recommender/__init__.py
-collaborative_recommender/surprise_rs.py
 content_recommender/__init__.py
 content_recommender/query_by_preference.py
 interface/__init__.py

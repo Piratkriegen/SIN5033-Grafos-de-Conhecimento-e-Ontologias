@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import List, Tuple
+from typing import List, Tuple, Dict
+import json
 
 import pandas as pd
 import requests
@@ -13,6 +14,8 @@ from pipeline.generate_recommendations import generate_recommendations
 DATA_PATH = "data/raw/serendipity_films_full.ttl.gz"
 WIKIDATA_URL = "https://query.wikidata.org/sparql"
 PLACEHOLDER_IMG = "https://placehold.co/200x300?text=Poster"
+METADATA_PATH = "data/metadata.json"
+USERS_PATH = "data/demo_users.json"
 
 
 @st.cache_resource
@@ -50,10 +53,37 @@ def load_catalog() -> pd.DataFrame:
 
 
 @st.cache_data(show_spinner=False)
+def load_metadata(path: str = METADATA_PATH) -> Dict[str, Dict[str, str | None]]:
+    """Carrega rótulos e anos pré-processados."""
+
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            return json.load(fh)
+    except Exception:
+        return {}
+
+
+@st.cache_data(show_spinner=False)
+def load_demo_users(path: str = USERS_PATH) -> Dict[str, List[str]]:
+    """Lê usuários de demonstração."""
+
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            items = json.load(fh)
+        return {u["id"]: u["watched"] for u in items}
+    except Exception:
+        return {}
+
+
+@st.cache_data(show_spinner=False)
 def fetch_label_year(uri: str) -> Tuple[str, str | None]:
-    """Obtém rótulo e ano via Wikidata."""
+    """Obtém rótulo e ano via cache local ou Wikidata."""
 
     qid = uri.split("/")[-1]
+    if qid in _metadata:
+        meta = _metadata[qid]
+        return meta.get("label", qid), meta.get("year")
+
     query = f"""
     SELECT ?l ?date WHERE {{
       OPTIONAL {{ wd:{qid} rdfs:label ?l FILTER(lang(?l)='en') }}
@@ -131,14 +161,20 @@ def get_details(graph: Graph, uri: str) -> dict[str, List[str]]:
 
 _graph = load_graph()
 catalog_df = load_catalog()
+_metadata = load_metadata()
+_demo_users = load_demo_users()
 
 st.title("Amazing Video Recommender")
 
-selected = st.selectbox(
-    "\U0001f50d Selecione um filme",
-    options=catalog_df["uri"],
-    format_func=lambda u: fetch_label_year(u)[0],
-)
+user = st.selectbox("Usuário de exemplo", options=list(_demo_users))
+selected = None
+if user:
+    watched = _demo_users[user]
+    selected = watched[-1]
+    with st.expander("Histórico de filmes"):
+        for uri in watched:
+            lbl, yr = fetch_label_year(uri)
+            st.write(f"- {lbl} ({yr or 'N/A'})")
 
 if selected:
     with st.expander("Detalhes do filme"):
@@ -150,20 +186,22 @@ if selected:
         st.write("**Elenco:**", ", ".join(details["cast"]) or "N/A")
 
     st.subheader("Você pode gostar também de…")
-    recs_log = recommend_logical(selected, DATA_PATH)
+    recs_log = recommend_logical(selected, DATA_PATH, rdf_graph=_graph)
     cols = st.columns(len(recs_log))
     for col, uri in zip(cols, recs_log):
         img = fetch_image(uri)
         col.image(img, caption=fetch_label_year(uri)[0], use_column_width=True)
 
     st.subheader("Ou se surpreenda com…")
+    ratings = {(user, URIRef(u)): 5.0 for u in watched}
     recs_ser = generate_recommendations(
-        "user",
-        {("user", URIRef(selected)): 5.0},
+        user,
+        ratings,
         DATA_PATH,
         top_n=5,
         alpha=1.0,
         beta=0.0,
+        rdf_graph=_graph,
     )
     cols = st.columns(len(recs_ser))
     for col, qid in zip(cols, recs_ser):

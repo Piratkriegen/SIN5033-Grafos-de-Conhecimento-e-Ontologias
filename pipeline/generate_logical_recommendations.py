@@ -3,18 +3,41 @@ from __future__ import annotations
 from typing import List
 from rdflib import Graph
 import gzip
+from typing import Dict
+
+_GRAPH_CACHE: Dict[str, Graph] = {}
+
+
+def clear_cache() -> None:
+    """Remove todos os grafos armazenados no cache."""
+
+    _GRAPH_CACHE.clear()
 
 
 def _load_graph(path: str) -> Graph:
-    """Carrega um grafo RDF do caminho fornecido."""
-    g = Graph()
-    if path.endswith(".gz"):
-        with gzip.open(path, "rt", encoding="utf-8") as f:
-            data = f.read()
-        g.parse(data=data, format="turtle")
-    else:
-        g.parse(path, format="turtle")
-    return g
+    """Retorna grafo RDF reutilizando o cache.
+
+    Parameters
+    ----------
+    path : str
+        Caminho do arquivo TTL/OWL.
+
+    Returns
+    -------
+    Graph
+        Grafo RDF carregado.
+    """
+
+    if path not in _GRAPH_CACHE:
+        g = Graph()
+        if path.endswith(".gz"):
+            with gzip.open(path, "rt", encoding="utf-8") as f:
+                data = f.read()
+            g.parse(data=data, format="turtle")
+        else:
+            g.parse(path, format="turtle")
+        _GRAPH_CACHE[path] = g
+    return _GRAPH_CACHE[path]
 
 
 def recommend_logical(
