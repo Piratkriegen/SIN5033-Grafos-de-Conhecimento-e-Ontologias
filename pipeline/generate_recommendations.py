@@ -3,7 +3,7 @@
 
 """Pipeline para gerar recomendações serendipiosas."""
 
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, Optional
 
 from rdflib import URIRef, Graph
 from rdflib.namespace import RDF
@@ -94,7 +94,7 @@ def generate_recommendations(
     alpha: float = 0.5,
     beta: float = 0.5,
     novelty_metric: str = "betweenness",
-    rdf_graph: Graph | None = None,
+    rdf_graph: Optional[Graph] = None,
 ) -> List[str]:
     """Gera recomendações híbridas baseadas em conteúdo e colaboração.
 
