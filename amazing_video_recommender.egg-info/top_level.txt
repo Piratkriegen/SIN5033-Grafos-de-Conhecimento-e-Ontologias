@@ -1,4 +1,3 @@
-collaborative_recommender
 content_recommender
 interface
 ontology

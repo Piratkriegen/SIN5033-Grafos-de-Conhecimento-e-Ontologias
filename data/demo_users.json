@@ -1,0 +1,5 @@
+[
+  {"id": "alice", "watched": ["http://www.wikidata.org/entity/Q44578", "http://www.wikidata.org/entity/Q130232"]},
+  {"id": "bob", "watched": ["http://www.wikidata.org/entity/Q173313"]},
+  {"id": "carol", "watched": ["http://www.wikidata.org/entity/Q193581", "http://www.wikidata.org/entity/Q214885"]}
+]

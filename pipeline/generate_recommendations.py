@@ -11,13 +11,42 @@ from rdflib.namespace import RDF
 from ontology.build_ontology import build_ontology_graph
 
 from content_recommender.query_by_preference import query_by_preference
-from collaborative_recommender.surprise_rs import SurpriseRS
+from src.recommender.recommenders.surprise_rs import SurpriseRS
 
 # from serendipity.distance import compute_avg_shortest_path_length
 from serendipity.centrality import compute_betweenness
 from .engine import rerank
 
 import networkx as nx
+from typing import Dict
+
+_GRAPH_CACHE: Dict[str, Graph] = {}
+
+
+def clear_cache() -> None:
+    """Remove todos os grafos armazenados no cache."""
+
+    _GRAPH_CACHE.clear()
+
+
+def _load_graph(path: str) -> Graph:
+    """Retorna grafo inferido reutilizando o cache.
+
+    Parameters
+    ----------
+    path : str
+        Caminho do arquivo TTL/OWL.
+
+    Returns
+    -------
+    Graph
+        Grafo RDF com inferências.
+    """
+
+    if path not in _GRAPH_CACHE:
+        _GRAPH_CACHE[path] = build_ontology_graph(path)
+    return _GRAPH_CACHE[path]
+
 
 BASE = "http://ex.org/stream#"
 
@@ -89,11 +118,7 @@ def generate_recommendations(
 
     # 1. Carrega o grafo com inferência (opcionalmente reutiliza existente)
     # fmt: off
-    rdf_graph = (
-        rdf_graph
-        if rdf_graph is not None
-        else build_ontology_graph(ontology_path)
-    )
+    rdf_graph = rdf_graph if rdf_graph is not None else _load_graph(ontology_path)
     # fmt: on
 
     # 2. Seleciona candidatos via content-based (SPARQL)
