@@ -77,7 +77,7 @@ def test_generate_recommendations_reuses_graph(tmp_path, monkeypatch):
         return {item: 1.0 for item in items}
 
     monkeypatch.setattr(
-        "src.recommender.recommenders.surprise_rs.SurpriseRS.predict",
+        "collaborative_recommender.surprise_rs.SurpriseRS.predict",
         fake_predict,
     )
 
@@ -109,7 +109,7 @@ def test_global_cache_generate_recommendations(tmp_path, monkeypatch):
         return {item: 1.0 for item in items}
 
     monkeypatch.setattr(
-        "src.recommender.recommenders.surprise_rs.SurpriseRS.predict",
+        "collaborative_recommender.surprise_rs.SurpriseRS.predict",
         fake_predict,
     )
 

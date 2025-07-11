@@ -2,7 +2,7 @@ from rdflib import Graph
 from rdflib import URIRef
 import networkx as nx
 
-from src.recommender.graph_builder import build_graph
+from serendipity.graph_builder import build_graph
 
 BASE = "http://ex.org/stream#"
 

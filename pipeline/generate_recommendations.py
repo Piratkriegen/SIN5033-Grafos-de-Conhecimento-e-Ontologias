@@ -11,14 +11,21 @@ from rdflib.namespace import RDF
 from ontology.build_ontology import build_ontology_graph
 
 from content_recommender.query_by_preference import query_by_preference
-from src.recommender.recommenders.surprise_rs import SurpriseRS
+
+try:  # pragma: no cover - fallback for PYTHONPATH issues
+    from collaborative_recommender.surprise_rs import SurpriseRS
+except ModuleNotFoundError:  # fallback when package not on sys.path
+    import sys
+    from pathlib import Path
+
+    sys.path.append(str(Path(__file__).resolve().parents[1]))
+    from collaborative_recommender.surprise_rs import SurpriseRS
 
 # from serendipity.distance import compute_avg_shortest_path_length
 from serendipity.centrality import compute_betweenness
 from .engine import rerank
 
 import networkx as nx
-from typing import Dict
 
 _GRAPH_CACHE: Dict[str, Graph] = {}
 
@@ -118,7 +125,9 @@ def generate_recommendations(
 
     # 1. Carrega o grafo com inferência (opcionalmente reutiliza existente)
     # fmt: off
-    rdf_graph = rdf_graph if rdf_graph is not None else _load_graph(ontology_path)
+    rdf_graph = (
+        rdf_graph if rdf_graph is not None else _load_graph(ontology_path)
+    )
     # fmt: on
 
     # 2. Seleciona candidatos via content-based (SPARQL)

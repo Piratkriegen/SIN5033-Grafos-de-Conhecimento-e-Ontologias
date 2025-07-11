@@ -1,6 +1,6 @@
 # tests/test_surprise_rs.py
 import pytest
-from src.recommender.recommenders.surprise_rs import SurpriseRS
+from collaborative_recommender.surprise_rs import SurpriseRS
 
 
 def test_surprise_rs_basic():
