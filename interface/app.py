@@ -22,23 +22,12 @@ catalog_df: pd.DataFrame | None = None
 
 
 def load_graph(path: str = DATA_PATH) -> Graph:
-    """Carrega a ontologia inferida.
-
-    Parameters
-    ----------
-    path : str
-        Caminho para o arquivo TTL/OWL.
-
-    Returns
-    -------
-    Graph
-        Grafo RDF com inferências.
-    """
+    """Load the inferred ontology graph."""
     return build_ontology_graph(path)
 
 
 def load_catalog() -> pd.DataFrame:
-    """Lista todos os filmes presentes no grafo global."""
+    """List all movies present in the global graph."""
     query = """
     PREFIX ex: <http://ex.org/stream#>
     SELECT DISTINCT ?f WHERE { ?f a ex:Filme . }
@@ -48,7 +37,7 @@ def load_catalog() -> pd.DataFrame:
 
 
 def fetch_label_year(uri: str) -> Tuple[str, Optional[str]]:
-    """Obtém rótulo e ano via Wikidata."""
+    """Get label and year from Wikidata."""
     qid = uri.split("/")[-1]
     query = f"""
     SELECT ?l ?date WHERE {{
@@ -77,7 +66,7 @@ def fetch_label_year(uri: str) -> Tuple[str, Optional[str]]:
 
 
 def fetch_image(uri: str) -> str:
-    """Retorna URL da imagem (P18) do item no Wikidata."""
+    """Return the image URL (P18) for a Wikidata item."""
     qid = uri.split("/")[-1]
     query = f"SELECT ?img WHERE {{ wd:{qid} wdt:P18 ?img }} LIMIT 1"
     try:
@@ -97,7 +86,7 @@ def fetch_image(uri: str) -> str:
 
 
 def get_details(graph: Graph, uri: str) -> Dict[str, List[str]]:
-    """Coleta gêneros, diretores e elenco do grafo local."""
+    """Collect genres, directors and cast from the local graph."""
     base = "http://www.wikidata.org/prop/direct/"
     p_genre = URIRef(base + "P136")
     p_director = URIRef(base + "P57")
@@ -187,7 +176,7 @@ def index():
 
 @app.before_request
 def init_graph() -> None:
-    """Carrega grafo e catálogo apenas na primeira requisição."""
+    """Load graph and catalog only on the first request."""
     global graph, catalog_df
     if graph is None:
         graph = load_graph()
@@ -195,7 +184,7 @@ def init_graph() -> None:
 
 
 def create_flask_app() -> Flask:
-    """Retorna a aplicação Flask configurada."""
+    """Return the configured Flask application."""
 
     return app
 

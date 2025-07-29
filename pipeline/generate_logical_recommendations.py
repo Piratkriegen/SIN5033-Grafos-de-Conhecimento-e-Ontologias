@@ -9,23 +9,23 @@ _GRAPH_CACHE: Dict[str, Graph] = {}
 
 
 def clear_cache() -> None:
-    """Remove todos os grafos armazenados no cache."""
+    """Remove all graphs stored in the cache."""
 
     _GRAPH_CACHE.clear()
 
 
 def _load_graph(path: str) -> Graph:
-    """Retorna grafo RDF reutilizando o cache.
+    """Return an RDF graph, reusing the cache when possible.
 
     Parameters
     ----------
     path : str
-        Caminho do arquivo TTL/OWL.
+        Path to the TTL/OWL file.
 
     Returns
     -------
     Graph
-        Grafo RDF carregado.
+        Loaded RDF graph.
     """
 
     if path not in _GRAPH_CACHE:
@@ -46,23 +46,23 @@ def recommend_logical(
     top_n: int = 5,
     rdf_graph: Graph | None = None,
 ) -> List[str]:
-    """Retorna filmes logicamente relacionados.
+    """Return logically related movies using the local ontology.
 
     Parameters
     ----------
     uri : str
-        URI do filme de referência.
+        Reference movie URI.
     ontology_path : str
-        Caminho para o dump de filmes.
+        Path to the movie dump.
     rdf_graph : Graph, optional
-        Grafo já carregado para reutilização.
+        Already loaded graph to reuse.
     top_n : int
-        Número máximo de recomendações.
+        Maximum number of recommendations.
 
     Returns
     -------
     List[str]
-        URIs de filmes recomendados.
+        URIs of recommended movies.
     """
     graph = rdf_graph if rdf_graph is not None else _load_graph(ontology_path)
     query = f"""

@@ -19,29 +19,14 @@ USERS_PATH = "data/demo_users.json"
 
 @st.cache_resource
 def load_graph(path: str = DATA_PATH) -> Graph:
-    """Carrega a ontologia inferida.
-
-    Parâmetros
-    ----------
-    path : str
-        Caminho para o dump local.
-
-    Retorna
-    -------
-    Graph
-        Grafo RDF com inferências.
-    """
+    """Load the inferred ontology graph."""
 
     return build_ontology_graph(path)
 
 
 @st.cache_data
 def load_catalog() -> pd.DataFrame:
-    """
-    Lista todos os filmes presentes no grafo.
-    Observação: prefixamos o parâmetro com _ para que o Streamlit
-    não tente hashear o objeto Graph.
-    """
+    """List all movies present in the graph."""
     query = """
     PREFIX ex: <http://ex.org/stream#>
     SELECT DISTINCT ?f WHERE { ?f a ex:Filme . }
@@ -55,7 +40,7 @@ def load_catalog() -> pd.DataFrame:
 def load_metadata(
     path: str = METADATA_PATH,
 ) -> Dict[str, Dict[str, str | None]]:
-    """Carrega rótulos e anos pré-processados."""
+    """Load cached labels and years."""
 
     try:
         with open(path, "r", encoding="utf-8") as fh:
@@ -66,7 +51,7 @@ def load_metadata(
 
 @st.cache_data(show_spinner=False)
 def load_demo_users(path: str = USERS_PATH) -> Dict[str, List[str]]:
-    """Lê usuários de demonstração."""
+    """Read demo users."""
 
     try:
         with open(path, "r", encoding="utf-8") as fh:
@@ -78,7 +63,7 @@ def load_demo_users(path: str = USERS_PATH) -> Dict[str, List[str]]:
 
 @st.cache_data(show_spinner=False)
 def fetch_label_year(uri: str) -> Tuple[str, str | None]:
-    """Obtém rótulo e ano via cache local ou Wikidata."""
+    """Get label and year from local cache or Wikidata."""
 
     qid = uri.split("/")[-1]
     if qid in _metadata:
@@ -113,7 +98,7 @@ def fetch_label_year(uri: str) -> Tuple[str, str | None]:
 
 @st.cache_data(show_spinner=False)
 def fetch_image(uri: str) -> str:
-    """Retorna URL da imagem (P18) do item no Wikidata."""
+    """Return the image URL (P18) from Wikidata."""
 
     qid = uri.split("/")[-1]
     query = f"SELECT ?img WHERE {{ wd:{qid} wdt:P18 ?img }} LIMIT 1"
@@ -134,7 +119,7 @@ def fetch_image(uri: str) -> str:
 
 
 def get_details(graph: Graph, uri: str) -> dict[str, List[str]]:
-    """Coleta gêneros, diretores e elenco do grafo local."""
+    """Collect genres, directors and cast from the local graph."""
 
     base = "http://www.wikidata.org/prop/direct/"
     p_genre = URIRef(base + "P136")
@@ -167,26 +152,26 @@ _demo_users = load_demo_users()
 
 st.title("Amazing Video Recommender")
 
-user = st.selectbox("Usuário de exemplo", options=list(_demo_users))
+user = st.selectbox("Example user", options=list(_demo_users))
 selected = None
 if user:
     watched = _demo_users[user]
     selected = watched[-1]
-    with st.expander("Histórico de filmes"):
+    with st.expander("Watch history"):
         for uri in watched:
             lbl, yr = fetch_label_year(uri)
             st.write(f"- {lbl} ({yr or 'N/A'})")
 
 if selected:
-    with st.expander("Detalhes do filme"):
+    with st.expander("Movie details"):
         title, year = fetch_label_year(selected)
         st.markdown(f"### {title} ({year or 'N/A'})")
         details = get_details(_graph, selected)
-        st.write("**Gêneros:**", ", ".join(details["genres"]) or "N/A")
-        st.write("**Diretores:**", ", ".join(details["directors"]) or "N/A")
-        st.write("**Elenco:**", ", ".join(details["cast"]) or "N/A")
+        st.write("**Genres:**", ", ".join(details["genres"]) or "N/A")
+        st.write("**Directors:**", ", ".join(details["directors"]) or "N/A")
+        st.write("**Cast:**", ", ".join(details["cast"]) or "N/A")
 
-    st.subheader("Você pode gostar também de…")
+    st.subheader("You might also like…")
     recs_log = recommend_logical(selected, DATA_PATH, rdf_graph=_graph)
     cols = st.columns(len(recs_log))
     for col, uri in zip(cols, recs_log):

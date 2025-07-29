@@ -1,51 +1,51 @@
-# SIN5033-Grafos-de-Conhecimento-e-Ontologias
+# Amazing Video Recommender
 
-Este repositório implementa um sistema de recomendação de filmes baseado em grafos de conhecimento. A ontologia descreve usuários, filmes e seus relacionamentos e é enriquecida com inferências OWL RL. Sobre este grafo são executadas consultas SPARQL para recomendações baseadas em conteúdo e cálculos de métricas de serendipidade para reranqueamento das sugestões.
+This repository implements a movie recommendation system built on top of a knowledge graph. The ontology describes users, movies and their relationships, and reasoning is applied using OWL RL. The main modules provide SPARQL queries for content-based filtering, collaborative relevance estimation and graph-based novelty metrics.
 
-## Estrutura dos pacotes
+## Package overview
 
-- `ontology/` &ndash; carregamento da ontologia e inferência com `owlrl`.
-- `content_recommender/` &ndash; consultas SPARQL para recomendações por preferência.
-- `serendipity/` &ndash; cálculo de métricas de grafo (centralidade, distância etc.).
-- `pipeline/` &ndash; orquestração do fluxo de recomendação e reranqueamento.
-- `interface/` &ndash; interface web em Streamlit (`interface/streamlit_app.py`).
-- `app.py` &ndash; pequena demonstração em Flask.
+- `ontology/` – ontology loading and reasoning utilities.
+- `content_recommender/` – SPARQL queries for preference-based selection.
+- `collaborative_recommender/` – a lightweight rating predictor.
+- `serendipity/` – graph metrics used to compute novelty.
+- `pipeline/` – orchestration of the recommendation flow.
+- `interface/` – Streamlit web interface.
+- `app.py` – minimal Flask demo.
 
-## Fluxo de recomendação
+## Recommendation workflow
 
-1. `build_ontology_graph()` carrega o arquivo OWL/TTL e aplica deduções OWL RL.
-2. `query_by_preference()` extrai candidatos que casam com as preferências declaradas pelo usuário.
-3. `SurpriseRS` estima relevância colaborativa a partir dos ratings.
-4. Métricas em `serendipity/` calculam novidade em um grafo de vizinhança.
-5. `pipeline.engine.rerank()` combina relevância e novidade para produzir a lista final.
+1. `build_ontology_graph()` parses the OWL/TTL dump and expands it with OWL RL rules.
+2. `query_by_preference()` retrieves candidate movies matching user preferences.
+3. `SurpriseRS` estimates collaborative relevance from explicit ratings.
+4. Functions in `serendipity/` compute novelty on the neighborhood graph.
+5. `pipeline.engine.rerank()` combines relevance and novelty to produce the final list.
 
-## Executando a aplicação
+## Running the application
 
-Instale as dependências uma vez:
+Install the dependencies once:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-Interface Streamlit:
+Launch the Streamlit interface:
 
 ```bash
 streamlit run interface/streamlit_app.py
 ```
 
-Demonstrador Flask:
+Or run the small Flask demo:
 
 ```bash
 python app.py
 ```
 
-## Executando os testes
+## Tests and formatting
 
-Rode as ferramentas de estilo e a suíte de testes:
+Run style checks and the test suite with:
 
 ```bash
 black --check .
 flake8 .
 pytest --maxfail=1 --disable-warnings -q
 ```
-

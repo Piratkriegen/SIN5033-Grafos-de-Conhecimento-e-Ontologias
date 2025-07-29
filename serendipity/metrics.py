@@ -1,7 +1,5 @@
 # arquivo: serendipity/metrics.py
-# Python 3
-
-"""Métricas de novidade baseadas em redes complexas."""
+"""Novelty metrics based on complex networks."""
 
 from typing import Any, Dict
 
@@ -9,36 +7,12 @@ import networkx as nx
 
 
 def compute_clustering_coefficient(graph: nx.Graph) -> Dict[Any, float]:
-    """Calcula o coeficiente de clustering de cada nó.
-
-    Parameters
-    ----------
-    graph : nx.Graph
-        Grafo não-direcionado.
-
-    Returns
-    -------
-    Dict[Any, float]
-        Mapeamento ``{nó: coeficiente}``.
-    """
+    """Return the clustering coefficient of each node."""
     return nx.clustering(graph)
 
 
 def compute_pagerank(graph: nx.Graph, **kwargs: Any) -> Dict[Any, float]:
-    """Retorna o PageRank de cada nó.
-
-    Parameters
-    ----------
-    graph : nx.Graph
-        Grafo de interesse.
-    **kwargs : Any
-        Parâmetros adicionais para ``networkx.pagerank``.
-
-    Returns
-    -------
-    Dict[Any, float]
-        PageRank por nó.
-    """
+    """Return the PageRank of each node."""
     return nx.pagerank(graph, **kwargs)
 
 
@@ -46,22 +20,19 @@ def compute_hhi(
     graph: nx.Graph,
     communities: Dict[Any, int],
 ) -> Dict[Any, float]:
-    """Calcula o índice de Herfindahl-Hirschman (HHI) de cada nó.
-
-    Para cada nó, considera a distribuição dos vizinhos entre as
-    comunidades informadas.
+    """Compute the Herfindahl-Hirschman index (HHI) of each node.
 
     Parameters
     ----------
     graph : nx.Graph
-        Grafo a ser analisado.
+        Graph to analyze.
     communities : Dict[Any, int]
-        Mapeamento ``nó → id_da_comunidade``.
+        Mapping ``node → community_id``.
 
     Returns
     -------
     Dict[Any, float]
-        ``{nó: hhi}`` para todos os nós do grafo.
+        ``{node: hhi}`` for all nodes in the graph.
     """
     hhi: Dict[Any, float] = {}
     for node in graph:

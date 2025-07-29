@@ -1,6 +1,3 @@
-# arquivo: src/recommender/features/distance.py
-# Python 3
-
 import networkx as nx
 from typing import Dict, Any
 
@@ -8,25 +5,25 @@ from typing import Dict, Any
 def compute_avg_shortest_path_length(
     graph: nx.Graph,
 ) -> Dict[Any, float]:
-    """Calcula a média das distâncias (caminhos mais curtos).
+    """Compute the mean shortest path length for every node.
 
-    Para cada nó em ``graph`` são consideradas todas as distâncias
-    até os demais nós alcançáveis.
+    For each node, all reachable nodes are considered when averaging the
+    shortest path lengths.
 
-    Parâmetros
+    Parameters
     ----------
     graph : nx.Graph
-        Grafo não-direcionado.
+        Undirected graph.
 
-    Retorna
+    Returns
     -------
     Dict[Any, float]
-        Dicionário { nó: média_das_distâncias, … }.
+        Mapping ``{node: mean_distance, ...}``.
     """
     results: Dict[Any, float] = {}
     for node in graph.nodes:
         lengths = nx.single_source_shortest_path_length(graph, node)
-        # remove a distância para o próprio nó
+        # discard distance to the node itself
         distances = [d for target, d in lengths.items() if target != node]
         if distances:
             results[node] = sum(distances) / len(distances)
