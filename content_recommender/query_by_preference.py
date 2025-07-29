@@ -1,30 +1,26 @@
-# content_recommender/query_by_preference.py
 from rdflib import Graph
 from typing import List
 
 
 def query_by_preference(rdf_graph: Graph, user_uri: str) -> List[str]:
-    """
-    Retorna a lista de filmes que casam com as preferências do usuário,
-    combinando SPARQL sobre três propriedades:
+    """Retrieve movies that match a user's declared preferences.
 
-      - ?user :prefereTematica ?t . ?filme :tematica ?t
-      - ?user :prefereAtor    ?a . ?filme :temAtor  ?a
-      - ?user :prefereDiretor ?d . ?filme :temDiretor ?d
+    The SPARQL query checks for preferred genres, actors and directors and
+    returns unique movie identifiers that satisfy at least one of these
+    criteria.
 
-    Parâmetros
+    Parameters
     ----------
     rdf_graph : Graph
-        Grafo inferido por build_ontology_graph().
+        Ontology graph produced by ``build_ontology_graph``.
     user_uri : str
-        URI completa do usuário (e.g. "http://amazingvideo.org#Usuario123").
+        Full URI of the user.
 
-    Retorna
+    Returns
     -------
     List[str]
-        Lista de local-names (e.g. ["Filme001", "FilmeXYZ"]) sem duplicatas.
+        Local names of matching movies without duplicates.
     """
-    # --- complete com SPARQL + UNION ---
     sparql = f"""
     PREFIX : <http://amazingvideo.org#>
 
@@ -39,10 +35,6 @@ def query_by_preference(rdf_graph: Graph, user_uri: str) -> List[str]:
          ?filme        :temDiretor     ?d . }}
     }}
     """
-    # …aqui o Codex deve:
-    #   1. executar `rdf_graph.query(sparql)`
-    #   2. iterar sobre os resultados, extrair `str(f).split("#")[-1]`
-    #   3. devolver lista de strings
 
     results = rdf_graph.query(sparql)
     filmes: List[str] = []

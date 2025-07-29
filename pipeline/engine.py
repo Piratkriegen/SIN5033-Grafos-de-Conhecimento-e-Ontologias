@@ -1,6 +1,3 @@
-# arquivo: src/recommender/engine.py
-# Python 3
-
 from typing import List, Dict, Any
 
 
@@ -11,27 +8,28 @@ def rerank(
     alpha: float = 0.5,
     beta: float = 0.5,
 ) -> List[Any]:
-    """
-    Reordena uma lista de candidatos por serendipidade:
-      score(item) = alpha * novelty[item] + beta * relevance[item]
+    """Reorder items by serendipity.
 
-    Parametros
+    The final score is computed as
+    ``alpha * novelty[item] + beta * relevance[item]``.
+
+    Parameters
     ----------
     candidates : List[Any]
-        Itens a serem rankeados.
+        Items to sort.
     relevance : Dict[Any, float]
-        Score de relevancia (e.g. similaridade) por item.
+        Relevance score for each item.
     novelty : Dict[Any, float]
-        Score de novidade por item.
+        Novelty score for each item.
     alpha : float
-        Peso da novidade no score combinado.
+        Weight of novelty in the combined score.
     beta : float
-        Peso da relevancia no score combinado.
+        Weight of relevance in the combined score.
 
-    Retorna
+    Returns
     -------
     List[Any]
-        Lista de candidatos ordenada do maior para o menor score combinado.
+        Candidates ordered from highest to lowest combined score.
     """
     scores = {}
     for item in candidates:

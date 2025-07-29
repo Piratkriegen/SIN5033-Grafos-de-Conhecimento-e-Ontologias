@@ -1,7 +1,4 @@
-# pipeline/generate_recommendations.py
-# Python 3
-
-"""Pipeline para gerar recomendações serendipiosas."""
+"""Pipeline to generate serendipitous recommendations."""
 
 from typing import Any, Dict, List, Tuple, Optional
 
@@ -31,23 +28,23 @@ _GRAPH_CACHE: Dict[str, Graph] = {}
 
 
 def clear_cache() -> None:
-    """Remove todos os grafos armazenados no cache."""
+    """Clear all cached graphs."""
 
     _GRAPH_CACHE.clear()
 
 
 def _load_graph(path: str) -> Graph:
-    """Retorna grafo inferido reutilizando o cache.
+    """Return an inferred graph, reusing the cache when available.
 
     Parameters
     ----------
     path : str
-        Caminho do arquivo TTL/OWL.
+        Path to the TTL/OWL file.
 
     Returns
     -------
     Graph
-        Grafo RDF com inferências.
+        RDF graph with inferences.
     """
 
     if path not in _GRAPH_CACHE:
@@ -59,25 +56,20 @@ BASE = "http://ex.org/stream#"
 
 
 def _build_graph(rdf_graph: Graph) -> nx.Graph:
-    """Converte um ``rdflib.Graph`` em um grafo ``networkx`` simples.
+    """Convert an ``rdflib.Graph`` to a simple ``networkx`` graph.
 
-    A implementação anterior considerava apenas as relações ``:assiste`` e
-    ``:pertenceAGenero``. Nos testes fornecidos, entretanto, os grafos usam
-    outras propriedades como ``:tematica`` e ``:dirigidoPor``. Para que a
-    métrica de novidade funcione corretamente em todos os cenários de teste,
-    passamos a considerar **todas** as triplas (exceto ``rdf:type``) ao
-    montar o grafo.
+    All triples except ``rdf:type`` are considered edges so the novelty metrics
+    operate consistently across different test graphs.
     """
 
     graph = nx.Graph()
 
     for s, p, o in rdf_graph.triples((None, None, None)):
         if p == RDF.type:
-            # 'rdf:type' apenas declara classes; não contribui para
-            # conectividade
+            # ``rdf:type`` only declares classes and does not add connectivity
             continue
         if not isinstance(o, URIRef):
-            # ignoramos valores literais para manter apenas ligações entre nós
+            # ignore literals to keep only edges between resources
             continue
         graph.add_node(s)
         graph.add_node(o)
@@ -96,59 +88,57 @@ def generate_recommendations(
     novelty_metric: str = "betweenness",
     rdf_graph: Optional[Graph] = None,
 ) -> List[str]:
-    """Gera recomendações híbridas baseadas em conteúdo e colaboração.
+    """Generate hybrid recommendations based on content and collaboration.
 
     Parameters
     ----------
     user_id : Any
-        Identificador do usuário.
+        Identifier of the target user.
     ratings : Dict[Tuple[Any, Any], float]
-        Avaliações conhecidas.
+        Known user ratings.
     ontology_path : str
-        Caminho para o arquivo de ontologia.
+        Path to the ontology file.
     rdf_graph : Graph, optional
-        Grafo já inferido para reutilização.
+        Pre-loaded graph to reuse.
     top_n : int
-        Número máximo de itens retornados.
+        Maximum number of returned items.
     alpha : float
-        Peso de novidade.
+        Weight of novelty.
     beta : float
-        Peso de relevância.
+        Weight of relevance.
     novelty_metric : str
-        Métrica de novidade a ser utilizada.
+        Novelty metric to compute.
 
     Returns
     -------
     List[str]
-        Lista de identificadores de vídeo.
+        Identifiers of recommended videos.
     """
 
-    # 1. Carrega o grafo com inferência (opcionalmente reutiliza existente)
+    # 1. Load the inferred graph, optionally reusing an existing instance
     # fmt: off
     rdf_graph = (
         rdf_graph if rdf_graph is not None else _load_graph(ontology_path)
     )
     # fmt: on
 
-    # 2. Seleciona candidatos via content-based (SPARQL)
-    #    usando as preferências do usuário na ontologia inferida
+    # 2. Select candidates using content-based SPARQL filters
 
     user_uri = BASE + str(user_id)
-    # retorna lista de local-names, ex: ["videoA","videoB"]
+    # returns a list of local names, e.g. ["videoA", "videoB"]
     candidate_names = query_by_preference(rdf_graph, user_uri)
-    # converte de volta para URIRefs
+    # convert back to URIRefs
     candidates = [URIRef(BASE + name) for name in candidate_names]
 
-    # (Opcional) Se não houver candidato por filtro de conteúdo,
-    # pode-se cair em todos os filmes:
+    # If no candidate is found by content filtering fall back to all movies
     if not candidates:
         video_class = URIRef(BASE + "Filme")
         triples = rdf_graph.triples((None, RDF.type, video_class))
         candidates = [subj for subj, _, _ in triples]
 
-    # 3. Treina e prediz relevância colaborativa
+    # 3. Train and predict collaborative relevance
     rs = SurpriseRS()
-    # converte itens de ratings para URIRefs para compatibilidade
+    # convert rating items to URIRefs for compatibility
     ratings_uri = {
         (u, URIRef(BASE + i) if not isinstance(i, URIRef) else i): r
         for (u, i), r in ratings.items()
@@ -156,7 +146,7 @@ def generate_recommendations(
     rs.fit(ratings_uri)
     relevance = rs.predict(user_id, candidates)
 
-    # 4. Calcula novelty a partir do grafo
+    # 4. Compute novelty from the graph
     graph_nx = _build_graph(rdf_graph)
 
     from serendipity.metrics import (
@@ -188,8 +178,8 @@ def generate_recommendations(
         raise ValueError(f"Unknown novelty_metric: {novelty_metric}")
     novelty = {c: novelty_full.get(c, 0.0) for c in candidates}
 
-    # 5. Reordena
+    # 5. Re-rank candidates
     ordered = rerank(candidates, relevance, novelty, alpha, beta)
 
-    # 6. Extrai local-names e limita ao top_n
+    # 6. Extract local names and limit to ``top_n``
     return [str(uri).split("#")[-1] for uri in ordered[:top_n]]

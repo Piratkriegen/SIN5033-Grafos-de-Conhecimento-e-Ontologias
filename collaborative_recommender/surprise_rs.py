@@ -2,12 +2,10 @@ from typing import Any, Dict, List, Tuple
 
 
 class SurpriseRS:
-    """Pequena implementação simplificada de um sistema de recomendação.
+    """Minimal recommender used for tests without external dependencies.
 
-    Esta classe não utiliza a biblioteca ``surprise`` para evitar depender de
-    pacotes externos durante os testes. O treinamento consiste em armazenar as
-    avaliações fornecidas, esperando que ``ratings`` seja um dicionário no
-    formato ``{(usuario, item): nota}``.
+    The class stores the provided ratings and computes simple mean ratings for
+    each item. It intentionally avoids using the ``surprise`` package.
     """
 
     def __init__(self) -> None:
@@ -15,7 +13,7 @@ class SurpriseRS:
         self.global_mean: float = 0.0
 
     def fit(self, ratings: Dict[Tuple[Any, Any], float]) -> None:
-        """Armazena as avaliações e calcula a média global."""
+        """Store ratings and compute a global mean."""
         self.ratings = ratings
         if ratings:
             self.global_mean = sum(ratings.values()) / len(ratings)
@@ -23,8 +21,8 @@ class SurpriseRS:
             self.global_mean = 0.0
 
     def predict(self, user_id: Any, items: List[Any]) -> Dict[Any, float]:
-        """Retorna uma relevância simples para cada item."""
-        # média das notas para cada item considerando todos os usuários
+        """Return a simple relevance score for each item."""
+        # mean rating per item considering all users
         item_sum: Dict[Any, float] = {}
         item_count: Dict[Any, int] = {}
         for (u, i), r in self.ratings.items():

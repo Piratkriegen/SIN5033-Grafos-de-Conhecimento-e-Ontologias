@@ -1,20 +1,20 @@
-"""Utilitários para criação de grafos RDFLib."""
+"""Helper utilities to load OWL or TTL files as ``rdflib.Graph`` objects."""
 
 from rdflib import Graph
 
 
 def as_rdflib_graph(path: str) -> Graph:
-    """Carrega um arquivo OWL ou TTL em um :class:`rdflib.Graph`.
+    """Load an ontology file into an ``rdflib.Graph``.
 
     Parameters
     ----------
     path : str
-        Caminho para um arquivo ``.ttl`` ou ``.owl``.
+        Path to a ``.ttl`` or ``.owl`` file.
 
     Returns
     -------
     Graph
-        Grafo RDFLib resultante do ``parse`` do arquivo.
+        Parsed RDFLib graph.
     """
 
     fmt = "xml" if path.endswith((".owl", ".rdf", ".xml")) else "turtle"

@@ -1,5 +1,3 @@
-# src/recommender/ontology_loader.py
-
 from rdflib import Graph, URIRef
 from rdflib.namespace import RDF, OWL
 from owlrl import DeductiveClosure, OWLRL_Semantics
@@ -7,14 +5,23 @@ import gzip
 
 
 def load_ontology(path: str) -> Graph:
-    """
-    path: caminho para arquivo .ttl ou .owl
-    retorna: um RDFLib Graph com todos os axiomas carregados
+    """Load an ontology file and verify basic classes.
+
+    Parameters
+    ----------
+    path : str
+        Path to a ``.ttl`` or ``.owl`` file.
+
+    Returns
+    -------
+    Graph
+        RDFLib graph containing all loaded axioms.
 
     Raises
     ------
     ValueError
-        Se :Video, :Usuario ou :Genero não estiverem definidos como classes.
+        If ``:Video``, ``:Usuario`` or ``:Genero`` are not defined as
+        ``owl:Class``.
     """
     g = Graph()
     fmt = "xml" if path.endswith((".owl", ".rdf", ".xml")) else "turtle"
@@ -27,31 +34,23 @@ def load_ontology(path: str) -> Graph:
         "Genero": URIRef(base + "Genero"),
     }
 
-    # Aqui mudamos a verificação:
-    # procuramos (uri, rdf:type, owl:Class)
     for name, uri in required.items():
         if not any(g.triples((uri, RDF.type, OWL.Class))):
-            raise ValueError(f"Classe {name} não encontrada como owl:Class")
+            raise ValueError(f"Class {name} not found as owl:Class")
 
     return g
 
 
 def build_ontology_graph(ontology_path: str) -> Graph:
-    """
-    Carrega uma ontologia (TTL, OWL ou TTL.GZ), executa inferências OWL RL
-    e retorna um rdflib.Graph com axiomas explícitos e inferidos.
-    """
+    """Load an ontology, run OWL RL reasoning and return the inferred graph."""
     g = Graph()
 
-    # 1) Se for .ttl.gz ou .owl.gz, descompacta primeiro
     if ontology_path.endswith((".ttl.gz", ".owl.gz", ".rdf.gz")):
         with gzip.open(ontology_path, "rt", encoding="utf-8") as f:
             data = f.read()
-        # sempre formato turtle no dump
         g.parse(data=data, format="turtle")
 
     else:
-        # 2) Tenta carregar direto por extensão e faz fallback se precisar
         ext_xml = (".owl", ".rdf", ".xml")
         fmt = "xml" if ontology_path.endswith(ext_xml) else "turtle"
         try:
@@ -62,6 +61,5 @@ def build_ontology_graph(ontology_path: str) -> Graph:
             else:
                 raise
 
-    # 3) Roda o reasoner OWL RL
     DeductiveClosure(OWLRL_Semantics).expand(g)
     return g
